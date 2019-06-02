@@ -73,11 +73,16 @@ func main() {
 
 	dbConfig := config.GetPgsqlConfig(cfg.DB)
 
-	db, err := database.Connect(dbConfig)
+	db, err := sql.Open("postgres", dbConfig)
 	if err != nil {
+		logger.Error("db connection", err)
 		return
 	}
-	defer db.Close()
+
+	if err := db.Ping(); err != nil {
+		logger.Error(err)
+		return
+	}
 
 	n := 200
 
@@ -124,5 +129,8 @@ func main() {
 
 	fmt.Println(d1, d2, d3)
 
-	conn(50)
+	// conn(50)
+
+	var wc chan int
+	<-wc
 }
