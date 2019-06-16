@@ -13,6 +13,12 @@ func (s *S1) SetA(i int) {
 	logger.Debugf(`%p`, s)
 }
 
+func (s S1) SetA1(i int) {
+	s.A = i
+	logger.Debug(s)
+	logger.Debugf(`%v`, s)
+}
+
 func SetA(s S1, i int) {
 	s.A = i
 	logger.Debugf(`%p`, &s)
@@ -26,6 +32,7 @@ func main() {
 	s5 := s2
 
 	s1.SetA(1)
+	s2.SetA1(2)
 
 	SetA(s1, 2)
 
