@@ -12,6 +12,11 @@ import (
 
 func ArticlesCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Authorization")
+	w.Header().Set("Content-Type", "application/json")
+
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "Category: %v\n", vars["category"])
 }
@@ -22,7 +27,7 @@ func simpleMw(next http.Handler) http.Handler {
 		log.Println(r.RequestURI)
 		// Call the next handler, which can be another middleware in the chain, or the final handler.
 		next.ServeHTTP(w, r)
-	}) 
+	})
 }
 
 func simpleMw1(next http.HandlerFunc) http.HandlerFunc {
@@ -34,8 +39,7 @@ func simpleMw1(next http.HandlerFunc) http.HandlerFunc {
 		next(w, r)
 	}
 	return f
-} 
-  
+}
 
 func main() {
 	r := router.New()
