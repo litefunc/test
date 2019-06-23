@@ -45,12 +45,14 @@ func main() {
 	}
 	logger.Debug(tx)
 
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 5; i++ {
 		read(tx, i)
 		time.Sleep(time.Second)
 	}
 
 	logger.Debug(tx)
+	logger.Error(tx.Commit())
+	logger.Error(tx.Rollback())
 
 	var wc chan int
 	<-wc
