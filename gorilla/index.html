@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>MAP demo</title>
+</head>
+<body>
+
+	<div class="center"><img src="assets/img/noovo_logo.png"></div>
+	<h1 id="title">MAP demo</h1>
+	<!-- home page -->
+	<div class="page" id="home">
+		<a class="portal" href="#net"       style="background-image:url(assets/img/Internet.png)"></a>
+		<a class="link portal" href="#live"      style="background-image:url(assets/img/Live_TV.png)"></a>
+		<!-- <a class="link portal" href="#play/live" style="background-image:url(assets/img/Live_TV.png)"></a> -->
+		<a class="link portal" href="hdmi"     style="background-image:url(assets/img/HDMI.png)"></a>
+		<!-- <a class="link portal" href="#catch"     style="background-image:url(assets/img/Catch_up_TV.png)"></a> -->
+		<a class="link portal" href="#vod"       style="background-image:url(assets/img/VOD.png)"></a>
+	</div>
+
+	<!-- player -->
+	<div class="page" id="play" hidden>
+		<video id="player" controls hidden></video>
+		<div id="fading">
+			<div class="dot"></div>
+			<div class="dot" style="animation-delay: 0.5s;"></div>
+			<div class="dot" style="animation-delay: 1s;"></div>
+		</div>
+	</div>
+
+	<!-- catalogue -->
+	<div class="page" id="list" hidden>
+		<!-- the content of the page is dynamically appended -->
+	</div>
+
+	<!-- pop-up dialog -->
+	<div id="messenger"></div>
+
+	<link rel="stylesheet" href="assets/css/style.css">
+	<link rel="stylesheet" href="assets/css/player.css">
+	
+	<!-- <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous"> -->
+	<!-- <script defer src="https://use.fontawesome.com/releases/v5.6.3/js/all.js"></script> -->
+	<script src="assets/js/app.js"></script>
+</body>
+</html>

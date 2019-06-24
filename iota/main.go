@@ -21,5 +21,9 @@ func main() {
 	case IgStrawberries | IgShellfish:
 		logger.Debug(a, a)
 	}
+
+	logger.Debug(IgStrawberries & a)
+	logger.Debug(IgNuts & a)
+	logger.Debug(IgNuts&IgChocolate | IgNuts)
+	logger.Debug(IgNuts | a)
 }
-   
