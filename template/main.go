@@ -31,14 +31,21 @@ func genService(text, out string, ser service.Service) {
 
 	dir := os.Getenv("GOPATH") + "/src/test/template"
 
-	sdir := fmt.Sprintf(`%s/%s`, dir+"/out/service", ser.Package)
+	sdir := dir + "/out/service"
 	if _, err := os.Stat(sdir); os.IsNotExist(err) {
-		if err := os.Mkdir(sdir, os.ModeDir); err != nil {
+		if err := os.Mkdir(sdir, os.ModePerm); err != nil {
 			logger.Panic(err)
 		}
 	}
 
-	f, err := os.OpenFile(fmt.Sprintf(`%s/%s`, sdir, out), os.O_CREATE|os.O_WRONLY, 0666)
+	pdir := fmt.Sprintf(`%s/%s`, sdir, ser.Package)
+	if _, err := os.Stat(pdir); os.IsNotExist(err) {
+		if err := os.Mkdir(pdir, os.ModePerm); err != nil {
+			logger.Panic(err)
+		}
+	}
+
+	f, err := os.OpenFile(fmt.Sprintf(`%s/%s`, pdir, out), os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		panic(err)
 	}
