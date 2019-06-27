@@ -4,8 +4,8 @@ const Delete = `package {{.Package}}
 
 import (
 	"cloud/lib/logger"
-	"cloud/server/ota/service/common/model"
-	"cloud/server/ota/service/common/status"
+	"cloud/server/ota/service/common/v1/model"
+	"cloud/server/ota/service/common/v1/status"
 )
 
 func (rc Service) Delete{{.Model}}(token string, in {{.Model}}Unique) error {

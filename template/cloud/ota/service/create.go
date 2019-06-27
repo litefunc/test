@@ -6,9 +6,9 @@ import (
 	"cloud/lib/logger"
 	"fmt"
 	"time"
-	"cloud/server/ota/service/common/model"
-	"cloud/server/ota/service/common/status"
-	"cloud/server/ota/service/{{.Package}}/input"
+	"cloud/server/ota/service/v1/common/model"
+	"cloud/server/ota/service/v1/common/status"
+	"cloud/server/ota/service/v1/{{.Package}}/input"
 )
 
 func (rc Service) Create{{.Model}}(token string, in input.Create{{.Model}}) ({{.Model}}, error) {

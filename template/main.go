@@ -87,10 +87,12 @@ func delete(sers []service.Service) {
 func main() {
 
 	sers := []service.Service{
-		service.New("msfw", "MsFw", "MsFws"),
-		service.New("routerfw", "RouterFw", "RouterFws"),
-		service.New("docker", "Docker", "Dockers"),
-		service.New("notification", "Notification", "Notifications"),
+		// service.New("msfw", "MsFw", "MsFws"),
+		// service.New("routerfw", "RouterFw", "RouterFws"),
+		// service.New("docker", "Docker", "Dockers"),
+		// service.New("notification", "Notification", "Notifications"),
+		service.New("ui_share_com", "UIShareCom", "UIShareComs"),
+		service.New("ui_share_group", "UIShareGroup", "UIShareGroups"),
 	}
 
 	inits(sers)
