@@ -18,8 +18,8 @@ const Init = `package {{.Package}}
 
 import (
 	"cloud/server/ota/gcs"
-	"cloud/server/ota/service/common/v1/model"
-	"cloud/server/ota/service/common/v1/portal"
+	"cloud/server/ota/service/v1/common/model"
+	"cloud/server/ota/service/v1/common/portal"
 )
 
 type Service struct {

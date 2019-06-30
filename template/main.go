@@ -91,8 +91,12 @@ func main() {
 		// service.New("routerfw", "RouterFw", "RouterFws"),
 		// service.New("docker", "Docker", "Dockers"),
 		// service.New("notification", "Notification", "Notifications"),
-		service.New("ui_share_com", "UIShareCom", "UIShareComs"),
-		service.New("ui_share_group", "UIShareGroup", "UIShareGroups"),
+		// service.New("ui_share_com", "UIShareCom", "UIShareComs"),
+		// service.New("ui_share_group", "UIShareGroup", "UIShareGroups"),
+		// service.New("system", "System", "Systems"),
+		service.New("group_system", "GroupSystem", "GroupSystems"),
+		service.New("system_share_com", "SystemShareCom", "SystemShareComs"),
+		service.New("system_share_group", "SystemShareGroup", "SystemShareGroups"),
 	}
 
 	inits(sers)
