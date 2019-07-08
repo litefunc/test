@@ -4,9 +4,9 @@ const Update = `package {{.Package}}
 
 import (
 	"cloud/lib/logger"
-	"cloud/server/ota/service/v1/common/model"
-	"cloud/server/ota/service/v1/common/status"
-	"cloud/server/ota/service/v1/{{.Package}}/input"
+	"cloud/server/ota/service/v2/common/model"
+	"cloud/server/ota/service/v2/common/status"
+	"cloud/server/ota/service/v2/{{.Package}}/input"
 )
 
 func (rc Service) Update{{.Model}}(token string, in input.Update{{.Model}}) error {

@@ -94,9 +94,13 @@ func main() {
 		// service.New("ui_share_com", "UIShareCom", "UIShareComs"),
 		// service.New("ui_share_group", "UIShareGroup", "UIShareGroups"),
 		// service.New("system", "System", "Systems"),
-		service.New("group_system", "GroupSystem", "GroupSystems"),
-		service.New("system_share_com", "SystemShareCom", "SystemShareComs"),
-		service.New("system_share_group", "SystemShareGroup", "SystemShareGroups"),
+		// service.New("group_system", "GroupSystem", "GroupSystems"),
+		// service.New("system_share_com", "SystemShareCom", "SystemShareComs"),
+		// service.New("system_share_group", "SystemShareGroup", "SystemShareGroups"),
+		// service.New("medialist", "Medialist", "Medialists"),
+		// service.New("medialist_share_com", "MedialistShareCom", "MedialistShareComs"),
+		// service.New("medialist_share_group", "MedialistShareGroup", "MedialistShareGroups"),
+		service.New("device_error", "DeviceError", "DeviceErrors"),
 	}
 
 	inits(sers)
