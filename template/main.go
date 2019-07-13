@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"test/template/cloud/ota/service"
+	model "test/template/model/xorm"
 	"text/template"
 )
 
@@ -21,6 +22,20 @@ func gen(text string, f *os.File, ser service.Service) {
 	}
 
 	err = tmpl.Execute(f, ser)
+	if err != nil {
+		panic(err)
+	}
+
+}
+
+func stdout(text string, ser interface{}) {
+
+	tmpl, err := template.New("test").Parse(text)
+	if err != nil {
+		panic(err)
+	}
+
+	err = tmpl.Execute(os.Stdout, ser)
 	if err != nil {
 		panic(err)
 	}
@@ -97,10 +112,6 @@ func main() {
 		// service.New("group_system", "GroupSystem", "GroupSystems"),
 		// service.New("system_share_com", "SystemShareCom", "SystemShareComs"),
 		// service.New("system_share_group", "SystemShareGroup", "SystemShareGroups"),
-		// service.New("medialist", "Medialist", "Medialists"),
-		// service.New("medialist_share_com", "MedialistShareCom", "MedialistShareComs"),
-		// service.New("medialist_share_group", "MedialistShareGroup", "MedialistShareGroups"),
-		service.New("device_error", "DeviceError", "DeviceErrors"),
 	}
 
 	inits(sers)
@@ -108,4 +119,6 @@ func main() {
 	create(sers)
 	update(sers)
 	delete(sers)
+
+	stdout(model.Tmpl, model.Md)
 }

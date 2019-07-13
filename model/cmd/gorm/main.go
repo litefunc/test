@@ -25,4 +25,7 @@ func main() {
 	db.SingularTable(true)
 
 	internal.Portal(db)
+
+	internal.Tx(db)
+
 }

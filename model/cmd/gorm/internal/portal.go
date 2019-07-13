@@ -27,9 +27,17 @@ func Portal(db *gorm.DB) {
 
 	acc.Name = "n1"
 	logger.Error(tx.Save(acc).Error)
+	acc.Name = "n2"
+	logger.Error(tx.Where("email=?", "test1").Save(&acc).Error)
+
 	logger.Error(tx.Where(&acc).Find(&acc1).Error)
 	logger.Debug(acc1)
 
+	logger.Error(tx.Find(&acc).Error)
+	logger.Error(tx.Model(&acc).Delete(&acc).Error)
+	logger.Error(tx.Where("email=?", "abc").Delete(&acc).Error)
+	logger.Error(tx.Find(&acc).Error)
+	logger.Error(tx.Delete(acc).Error)
 	logger.Error(tx.Delete(acc).Error)
 	logger.Error(tx.Where(&acc).Find(&acc1).Error)
 	logger.Debug(acc1)

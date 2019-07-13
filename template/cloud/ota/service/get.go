@@ -4,9 +4,9 @@ const Get = `package {{.Package}}
 
 import (
 	"cloud/lib/logger"
-	"cloud/server/ota/service/v2/common/model"
-	"cloud/server/ota/service/v2/common/status"
-	"cloud/server/ota/service/v2/common/util"
+	"cloud/server/ota/service/v1/common/model"
+	"cloud/server/ota/service/v1/common/status"
+	"cloud/server/ota/service/v1/common/util"
 )
 
 func (rc Service) Get{{.Models}}(token string) ({{.Models}}, error) {

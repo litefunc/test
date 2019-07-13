@@ -9,11 +9,13 @@ import (
 )
 
 func Tx(db *gorm.DB) {
-	ctx, _ := context.WithTimeout(context.Background(), 4*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	tx := db.BeginTx(ctx, nil)
 
 	logger.Debug(tx)
 	time.Sleep(time.Second * 5)
+	tx.Commit()
+	tx.Rollback()
 	logger.Debug(tx)
 	logger.Debug(tx == nil)
 
