@@ -9,19 +9,19 @@ import (
 	"text/template"
 )
 
-func gen(text string, f *os.File, ser service.Service) {
+func gen(text string, f *os.File, data interface{}) {
 
 	tmpl, err := template.New("test").Parse(text)
 	if err != nil {
 		panic(err)
 	}
 
-	err = tmpl.Execute(os.Stdout, ser)
+	err = tmpl.Execute(os.Stdout, data)
 	if err != nil {
 		panic(err)
 	}
 
-	err = tmpl.Execute(f, ser)
+	err = tmpl.Execute(f, data)
 	if err != nil {
 		panic(err)
 	}
@@ -40,6 +40,24 @@ func stdout(text string, ser interface{}) {
 		panic(err)
 	}
 
+}
+
+func genModel(tmp string, md model.Model) {
+
+	dir := os.Getenv("GOPATH") + "/src/test/template"
+
+	sdir := dir + "/out/model"
+	if err := os.MkdirAll(sdir, os.ModePerm); err != nil {
+		logger.Panic(err)
+	}
+
+	f, err := os.OpenFile(fmt.Sprintf(`%s/%s`, sdir, md.File), os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	gen(tmp, f, md)
 }
 
 func genService(text, out string, ser service.Service) {
@@ -120,5 +138,5 @@ func main() {
 	update(sers)
 	delete(sers)
 
-	stdout(model.Tmpl, model.Md)
+	genModel(model.Tmpl, model.Md)
 }

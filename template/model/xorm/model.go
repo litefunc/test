@@ -1,22 +1,26 @@
 package model
 
 type Model struct {
-	Table    string
-	Model    string
-	Models   string
-	GetOneBy []By
-	GetBy    []By
-	GetByIn  []By
+	File           string
+	ServicePackage string
+	Table          string
+	Model          string
+	Models         string
+	GetOneBy       []By
+	GetBy          []By
+	GetByIn        []By
 }
 
-func New(tb, md, mds string, get, gets, getsin []By) Model {
+func New(file, ser, tb, md, mds string, get, gets, getsin []By) Model {
 	return Model{
-		Table:    tb,
-		Model:    md,
-		Models:   mds,
-		GetOneBy: get,
-		GetBy:    gets,
-		GetByIn:  getsin,
+		File:           file,
+		ServicePackage: ser,
+		Table:          tb,
+		Model:          md,
+		Models:         mds,
+		GetOneBy:       get,
+		GetBy:          gets,
+		GetByIn:        getsin,
 	}
 }
 
@@ -43,5 +47,5 @@ var (
 	by4      = NewBy("Coms", "coms []uint64", "com = ?", "coms")
 	getOneBy = []By{by1, by2, by3}
 	getByIn  = []By{by4}
-	Md       = New("cloud.msfw", "MsFw", "MsFws", getOneBy, nil, getByIn)
+	Md       = New("msfw.go", "msfw", "cloud.msfw", "MsFw", "MsFws", getOneBy, nil, getByIn)
 )
