@@ -22,7 +22,7 @@ type MsFw struct {
 
 type MsFwUnique struct {
 	Com     uint64 `json:"com"`
-	Version string `json:"ver"`
+	Version string `json:"ver" sql:",notnull"`
 }
 
 func GetAllMsFws(tx *Tx) (MsFws, error) {

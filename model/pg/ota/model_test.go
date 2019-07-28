@@ -217,6 +217,13 @@ func TestWhere(t *testing.T) {
 		return
 	}
 
+
+	md22.Version = ""
+	if _, err := tx.Model(&md22).Where("version = ?", md21.Version).Update(); err != nil {
+		t.Error(err)
+		return
+	}
+
 	// delete by tag
 	if _, err := tx.Model(&MsFw{}).Where("tag = ?", md22.Tag).Delete(); err != nil {
 		t.Error(err)
