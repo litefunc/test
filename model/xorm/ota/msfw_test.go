@@ -74,7 +74,7 @@ func TestMsFw(t *testing.T) {
 	// update by id
 	md2.Version = "test22"
 	md2.Com = 3
-	if err := UpdateMsFw(tx, md2); err != nil {
+	if err := UpdateMsFwById(tx, md2); err != nil {
 		t.Error(err)
 		return
 	}

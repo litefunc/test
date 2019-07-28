@@ -26,6 +26,14 @@ func (md MsFw) TableName() string {
 	return "cloud.msfw"
 }
 
+func (md MsFw) Cols() []string {
+	return []string{"id", "com", "version", "bucket", "obj", "time", "tag"}
+}
+
+func (md MsFw) ColsUpdate() []string {
+	return []string{"com", "version", "bucket", "obj", "time", "tag"}
+}
+
 func (md MsFwUnique) ServiceData() msfw.MsFwUnique {
 
 	return msfw.MsFwUnique{
@@ -171,14 +179,10 @@ func CountMsFwByUnique(tx *Tx, c MsFwUnique) (int64, error) {
 	return n, nil
 }
 
-func (pg Pg) InsertMsFw(tx *Tx, mds ...*msfw.MsFw) error {
-	var bys []*MsFw
-	for i := range mds {
-		var by *MsFw
-		by.SetData(*mds[i])
-		bys = append(bys, by)
-	}
-	return InsertMsFw(tx, bys...)
+func (pg Pg) InsertMsFw(tx *Tx, md *msfw.MsFw) error {
+	var in *MsFw
+	in.SetData(*md)
+	return InsertMsFw(tx, in)
 }
 
 func InsertMsFw(tx *Tx, mds ...*MsFw) error {
@@ -191,13 +195,13 @@ func InsertMsFw(tx *Tx, mds ...*MsFw) error {
 	return nil
 }
 
-func (pg Pg) UpdateMsFw(tx *Tx, md msfw.MsFw) error {
+func (pg Pg) UpdateMsFwById(tx *Tx, md msfw.MsFw) error {
 	var by *MsFw
 	by.SetData(md)
-	return UpdateMsFw(tx, *by)
+	return UpdateMsFwById(tx, *by)
 }
 
-func UpdateMsFw(tx *Tx, md MsFw) error {
+func UpdateMsFwById(tx *Tx, md MsFw) error {
 	if _, err := tx.Where("id = ?", md.ID).Update(md); err != nil {
 		logger.Error(err)
 		return err

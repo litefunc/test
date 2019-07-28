@@ -136,14 +136,10 @@ func Count{{$md}}ByUnique(tx *Tx, c {{$md}}Unique) (int64, error) {
 	return n, nil
 }
 
-func (pg Pg) Insert{{$md}}(tx *Tx, mds ...*{{$pkg}}.{{$md}}) error {
-	var bys []*{{$md}}
-	for i := range mds {
-		var by *{{$md}}
-		by.SetData(*mds[i])
-		bys = append(bys, by)
-	}
-	return Insert{{$md}}(tx, bys...)
+func (pg Pg) Insert{{$md}}(tx *Tx, md *msfw.{{$md}}) error {
+	var in *{{$md}}
+	in.SetData(*md)
+	return Insert{{$md}}(tx, in)
 }
 
 func Insert{{$md}}(tx *Tx, mds ...*{{$md}}) error {
