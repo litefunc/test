@@ -1,4 +1,4 @@
-package pgsql
+package query
 
 import (
 	"cloud/lib/logger"
