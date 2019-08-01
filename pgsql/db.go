@@ -1,10 +1,6 @@
 package pgsql
 
 import (
-	"cloud/lib/logger"
-	"fmt"
-	"regexp"
-	"strings"
 	"test/pgsql/query"
 
 	"github.com/jmoiron/sqlx"
