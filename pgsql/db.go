@@ -1,6 +1,7 @@
 package pgsql
 
 import (
+	"cloud/lib/logger"
 	"test/pgsql/query"
 
 	"github.com/jmoiron/sqlx"
@@ -8,12 +9,42 @@ import (
 )
 
 type DB struct {
-	db sqlx.DB
+	*sqlx.DB
 	q  query.Query
+	md interface{}
 }
 
-func (db DB) Select(cols ...string) DB {
-	db.q = db.q.Select(cols...)
+func Connect(dbConfig string) (*DB, error) {
+	db, err := sqlx.Connect("postgres", dbConfig)
+	if err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+	return &DB{DB: db}, nil
+}
+
+func (db DB) Close() error {
+	if err := db.DB.Close(); err != nil {
+		logger.Error(err)
+		return err
+	}
+	return nil
+}
+
+func (db DB) Run() error {
+	logger.Debug(db.md)
+	logger.Debug(db.q.SQL())
+	logger.Debug(db.q.Args()...)
+	if err := db.DB.Select(db.md, db.q.SQL(), db.q.Args()...); err != nil {
+		logger.Error(err)
+		return err
+	}
+	return nil
+}
+
+func (db DB) Select(md interface{}) DB {
+	db.q = db.q.Select(GetCols(md)...).From(GetTable(md))
+	db.md = md
 	return db
 }
 

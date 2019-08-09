@@ -37,31 +37,62 @@ func NewMsFw(version string, com uint64, bk, obj string, time time.Time, tag str
 	}
 }
 
+type in interface {
+	p()
+}
+
 func main() {
 	md1 := NewMsFw("v1", 1, "bk1", "obj1", time.Now().UTC(), "tag1")
 	md2 := NewMsFw("v2", 2, "bk2", "obj2", time.Now().UTC(), "tag2")
 	mds := MsFws{md1, md2}
 
-	t := reflect.TypeOf(md1)
-	logger.Debug(t.Kind() == reflect.Struct)
-	logger.Debug(t.String())
+	// t := reflect.TypeOf(md1)
+	// logger.Debug(t.Kind() == reflect.Struct)
+	// logger.Debug(t.String())
 
-	t1 := reflect.TypeOf(mds)
-	logger.Debug(t1.Kind() == reflect.Slice)
-	logger.Debug(t1.String())
+	// t1 := reflect.TypeOf(mds)
+	// logger.Debug(t1.Kind() == reflect.Slice)
+	// logger.Debug(t1.String())
 
-	field1 := t.Field(1)
-	tag1 := field1.Tag.Get("sql")
-	logger.Debug(tag1)
+	// field1 := t.Field(1)
+	// tag1 := field1.Tag.Get("sql")
+	// logger.Debug(tag1)
 
-	for i := 0; i < t.NumField(); i++ {
-		logger.Debug(t.Field(i))
-		logger.Debug(t.Field(i).Type)
-		p := reflect.New(t.Field(i).Type)
-		logger.Debug(p)
-	}
+	// for i := 0; i < t.NumField(); i++ {
+	// 	logger.Debug(t.Field(i))
+	// 	logger.Debug(t.Field(i).Type)
+	// 	p := reflect.New(t.Field(i).Type)
+	// 	logger.Debug(p)
+	// }
 
-	InspectStruct(&md1)
+	// e := t1.Elem()
+	// for i := 0; i < e.NumField(); i++ {
+	// 	logger.Debug(e.Field(i))
+	// 	logger.Debug(e.Field(i).Type)
+	// 	p := reflect.New(e.Field(i).Type)
+	// 	logger.Debug(p)
+	// }
+
+	i := 1
+	is := []int{1, 2}
+	// var in in
+
+	p(i)
+	p(is)
+	// p(in)
+	p(md1)
+	p(mds)
+	p(&md1)
+	p(&mds)
+
+}
+
+func p(i interface{}) {
+	logger.Debug("type name:", reflect.TypeOf(i).Name())
+	logger.Debug("type kind:", reflect.TypeOf(i).Kind())
+	logger.Debug("value kind:", reflect.ValueOf(i).Kind())
+	logger.Debug("type string:", reflect.TypeOf(i).String())
+	logger.Debug("value string:", reflect.ValueOf(i).String())
 
 }
 
