@@ -2,6 +2,8 @@ package pgsql
 
 import (
 	"cloud/lib/logger"
+	"database/sql"
+	"errors"
 	"test/pgsql/query"
 
 	"github.com/jmoiron/sqlx"
@@ -35,11 +37,47 @@ func (db DB) Run() error {
 	logger.Debug(db.md)
 	logger.Debug(db.q.SQL())
 	logger.Debug(db.q.Args()...)
-	if err := db.DB.Select(db.md, db.q.SQL(), db.q.Args()...); err != nil {
-		logger.Error(err)
-		return err
+	switch db.q.Type() {
+	case query.SELECT:
+		if err := db.DB.Select(db.md, db.q.SQL(), db.q.Args()...); err != nil {
+			logger.Error(err)
+			return err
+		}
+	default:
+		return errors.New("unknown statement type")
 	}
+
 	return nil
+}
+
+func (db DB) Exec() (sql.Result, error) {
+	logger.Debug(db.md)
+	logger.Debug(db.q.SQL())
+	logger.Debug(db.q.Args()...)
+	switch db.q.Type() {
+
+	case query.INSERT, query.UPDATE, query.DELETE:
+		result, err := db.DB.Exec(db.q.SQL(), db.q.Args()...)
+		if err != nil {
+			logger.Error(err)
+			return result, err
+		}
+	default:
+		return nil, errors.New("unknown statement type")
+	}
+
+	return nil, nil
+}
+
+func (db DB) Insert(md interface{}) DB {
+	db.q = db.q.Insert(GetTable(md), GetCols(md), GetValues(md)...)
+	db.md = md
+	return db
+}
+
+func (db DB) Returning(cols ...string) DB {
+	db.q = db.q.Returning(cols...)
+	return db
 }
 
 func (db DB) Select(md interface{}) DB {

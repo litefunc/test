@@ -17,13 +17,13 @@ import (
 type MsFws []MsFw
 
 type MsFw struct {
-	TableName  struct{} `json:"-" sql:"cloud.msfw"`
-	ID         uint64   `json:"id" sql:",pk"`
-	MsFwUnique `sql:"embed"`
-	Bucket     string      `json:"bucket"`
-	Obj        string      `json:"obj"`
-	Time       time.Time   `json:"time"`
-	Tag        null.String `json:"tag"`
+	TableName struct{} `json:"-" db:"cloud.msfw"`
+	ID        uint64   `json:"id" db:",pk"`
+	MsFwUnique
+	Bucket string      `json:"bucket"`
+	Obj    string      `json:"obj"`
+	Time   time.Time   `json:"time"`
+	Tag    null.String `json:"tag"`
 }
 
 type MsFwUnique struct {
@@ -44,12 +44,13 @@ func NewMsFw(version string, com uint64, bk, obj string, time time.Time, tag str
 }
 
 type Account struct {
-	Bio `sql:"embed"`
+	TableName struct{} `json:"-" db:"cloud.account"`
+	Bio
 	Pwd string `json:"pwd"`
 }
 
 type Bio struct {
-	ID      uint64      `json:"id"`
+	ID      uint64      `json:"id" db:"id,pk"`
 	Email   string      `json:"email"`
 	Name    string      `json:"name"`
 	Company uint64      `json:"com_id" sql:"com" db:"com"`
@@ -75,7 +76,6 @@ func main() {
 	md2 := NewMsFw("v2", 2, "bk2", "obj2", time.Now().UTC(), "tag2")
 	mds := MsFws{md1, md2}
 
-
 	db.Select(md1).Where("com=? AND gp IN(?)", 1, pq.Array([]uint64{1, 2, 3})).Order("com DESC", "gp ASC").Limit(10).SQL()
 	db.Select(&md1).Where("com=? AND gp IN(?)", 1, pq.Array([]uint64{1, 2, 3})).Order("com DESC", "gp ASC").Limit(10).SQL()
 	db.Select(mds).Where("com=? AND gp IN(?)", 1, pq.Array([]uint64{1, 2, 3})).Order("com DESC", "gp ASC").Limit(10).SQL()
@@ -84,7 +84,7 @@ func main() {
 
 	mds1 := Accounts{}
 
-	if err := db.Select(&mds1).Run();err !=nil {
+	if err := db.Select(&mds1).Run(); err != nil {
 		logger.Error(err)
 	}
 	for i := range mds1 {
@@ -92,11 +92,13 @@ func main() {
 	}
 
 	mds1 = Accounts{}
-	if err := db.DB.Select(&mds1, "SELECT * FROM account");err !=nil {
+	if err := db.DB.Select(&mds1, "SELECT * FROM account"); err != nil {
 		logger.Error(err)
 	}
 	for i := range mds1 {
 		logger.Debug(mds1[i])
 	}
-	
+
+	logger.Debug(pgsql.GetValues(md1))
+	db.Insert(md1).SQL()
 }
