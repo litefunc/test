@@ -2,8 +2,6 @@ package pgsql
 
 import (
 	"cloud/lib/logger"
-	"database/sql"
-	"errors"
 	"test/pgsql/query"
 
 	"github.com/jmoiron/sqlx"
@@ -33,83 +31,15 @@ func (db DB) Close() error {
 	return nil
 }
 
-func (db DB) Run() error {
-	logger.Debug(db.md)
-	logger.Debug(db.q.SQL())
-	logger.Debug(db.q.Args()...)
-	switch db.q.Type() {
-	case query.SELECT:
-		if err := db.DB.Select(db.md, db.q.SQL(), db.q.Args()...); err != nil {
-			logger.Error(err)
-			return err
-		}
-	default:
-		return errors.New("unknown statement type")
-	}
-
-	return nil
+func (db DB) Insert(md interface{}) Exec {
+	return NewExec(db.DB, db.q.Insert(GetTable(md), GetCols(md), GetValues(md)...), md)
 }
 
-func (db DB) Exec() (sql.Result, error) {
-	logger.Debug(db.md)
-	logger.Debug(db.q.SQL())
-	logger.Debug(db.q.Args()...)
-	switch db.q.Type() {
-
-	case query.INSERT, query.UPDATE, query.DELETE:
-		result, err := db.DB.Exec(db.q.SQL(), db.q.Args()...)
-		if err != nil {
-			logger.Error(err)
-			return result, err
-		}
-	default:
-		return nil, errors.New("unknown statement type")
-	}
-
-	return nil, nil
+func (db DB) Select(md interface{}) Query {
+	q := NewQuery(db.DB, db.q.Select(GetTable(md), GetCols(md)...), md)
+	return q
 }
 
-func (db DB) Insert(md interface{}) DB {
-	db.q = db.q.Insert(GetTable(md), GetCols(md), GetValues(md)...)
-	db.md = md
-	return db
-}
-
-func (db DB) Returning(cols ...string) DB {
-	db.q = db.q.Returning(cols...)
-	return db
-}
-
-func (db DB) Select(md interface{}) DB {
-	db.q = db.q.Select(GetCols(md)...).From(GetTable(md))
-	db.md = md
-	return db
-}
-
-func (db DB) From(table string) DB {
-	db.q = db.q.From(table)
-	return db
-}
-
-func (db DB) Where(condition string, args ...interface{}) DB {
-	db.q = db.q.Where(condition, args...)
-	return db
-}
-
-func (db DB) Order(args ...string) DB {
-	db.q = db.q.Order(args...)
-	return db
-}
-
-func (db DB) Limit(n uint64) DB {
-	db.q = db.q.Limit(n)
-	return db
-}
-
-func (db DB) SQL() string {
-	return db.q.SQL()
-}
-
-func (db DB) Args() []interface{} {
-	return db.q.Args()
+func (db DB) Delete(md interface{}) Exec {
+	return NewExec(db.DB, db.q.Delete(GetTable(md)), md)
 }
