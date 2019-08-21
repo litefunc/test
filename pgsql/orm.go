@@ -148,6 +148,55 @@ func getValues(t reflect.Type, v reflect.Value, tb string, cols []interface{}) [
 	return cols
 }
 
+func GetColsValues(md interface{}) map[string]interface{} {
+	if md == nil {
+		return nil
+	}
+
+	tb := GetTable(md)
+
+	t := reflect.TypeOf(md)
+	v := reflect.ValueOf(md)
+	kindOfJ := v.Kind()
+	if kindOfJ == reflect.Ptr {
+		t = t.Elem()
+		if t.Kind() == reflect.Slice {
+			t = t.Elem()
+			v = v.Elem()
+		}
+		cols := make(map[string]interface{})
+		return getColsValues(t, v, tb, cols)
+	}
+
+	if t.Kind() == reflect.Slice {
+		t = t.Elem()
+		v = v.Elem()
+	}
+	cols := make(map[string]interface{})
+
+	return getColsValues(t, v, tb, cols)
+}
+
+func getColsValues(t reflect.Type, v reflect.Value, tb string, cols map[string]interface{}) map[string]interface{} {
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+
+		column := field.Tag.Get("db")
+
+		if column == tb {
+			continue
+		}
+
+		if field.Type.Kind() == reflect.Struct && field.Anonymous {
+			cols = getColsValues(field.Type, v.Field(i), tb, cols)
+			continue
+		}
+		cols[toSnakeCase(t.Field(i).Name)] = v.Field(i).Interface()
+
+	}
+	return cols
+}
+
 func toSnakeCase(str string) string {
 
 	matchFirstCap := regexp.MustCompile("(.)([A-Z][a-z]+)")

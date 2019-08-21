@@ -40,6 +40,15 @@ func (db DB) Select(md interface{}) Query {
 	return q
 }
 
+func (db DB) Update(md interface{}) Exec {
+	q := db.q.Update(GetTable(md), nil)
+	return NewExec(db.DB, q, md)
+}
+
 func (db DB) Delete(md interface{}) Exec {
+	return NewExec(db.DB, db.q.Delete(GetTable(md)), md)
+}
+
+func (db DB) DeleteAll(md interface{}) Exec {
 	return NewExec(db.DB, db.q.Delete(GetTable(md)), md)
 }

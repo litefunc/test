@@ -45,6 +45,11 @@ func (db Exec) Where(condition string, args ...interface{}) Exec {
 	return db
 }
 
+func (db Exec) Set(condition string, args ...interface{}) Exec {
+	db.q = db.q.Set(condition, args...)
+	return db
+}
+
 func (db Exec) Returning(cols ...string) Exec {
 	db.q = db.q.Returning(cols...)
 	return db

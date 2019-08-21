@@ -67,6 +67,7 @@ const (
 	DELETE
 	COUNT
 	DISTINCT
+	TRUNCATE
 )
 
 func (qt QueryType) String() string {
@@ -83,6 +84,8 @@ func (qt QueryType) String() string {
 		return "COUNT"
 	case DISTINCT:
 		return "SELECT DISTINCT"
+	case TRUNCATE:
+		return "TRUNCATE TABLE"
 	default:
 		return ""
 	}
