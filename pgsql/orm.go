@@ -43,6 +43,69 @@ func GetTable(md interface{}) string {
 	return toSnakeCase(t.Name())
 }
 
+func GetPks(md interface{}) []string {
+	if md == nil {
+		return nil
+	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err)
+		}
+	}()
+
+	tb := GetTable(md)
+	t := reflect.TypeOf(md)
+	v := reflect.ValueOf(md)
+
+	kindOfJ := v.Kind()
+	if kindOfJ == reflect.Ptr {
+		t = t.Elem()
+		if t.Kind() == reflect.Slice {
+			t = t.Elem()
+		}
+		var cols []string
+		return getCols(t, tb, cols)
+	}
+
+	if t.Kind() == reflect.Slice {
+		t = t.Elem()
+	}
+	var cols []string
+
+	return getPks(t, tb, cols)
+}
+
+func getPks(t reflect.Type, tb string, cols []string) []string {
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		tag := field.Tag.Get("db")
+		if tag == tb {
+			continue
+		}
+
+		if field.Type.Kind() == reflect.Struct && field.Anonymous {
+			cols = getPks(field.Type, tb, cols)
+			continue
+		}
+
+		if strings.Contains(tag, ",pk") {
+
+			strs := strings.Split(tag, ",")
+			column := strs[0]
+
+			if column != "" {
+				cols = append(cols, column)
+			} else {
+				cols = append(cols, toSnakeCase(t.Field(i).Name))
+			}
+
+		}
+
+	}
+	return cols
+}
+
 func GetColsString(md interface{}) string {
 	return strings.Join(GetCols(md), ", ")
 }
@@ -84,9 +147,8 @@ func getCols(t reflect.Type, tb string, cols []string) []string {
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 
-		column := field.Tag.Get("db")
-
-		if column == tb {
+		tag := field.Tag.Get("db")
+		if tag == tb {
 			continue
 		}
 
@@ -95,9 +157,9 @@ func getCols(t reflect.Type, tb string, cols []string) []string {
 			continue
 		}
 
-		if column != "" {
+		if tag != "" {
 
-			strs := strings.Split(column, ",")
+			strs := strings.Split(tag, ",")
 			if strs[0] != "" {
 				cols = append(cols, strs[0])
 			} else {

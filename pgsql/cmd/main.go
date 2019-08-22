@@ -108,4 +108,7 @@ func main() {
 
 	var ch chan int
 	pgsql.GetTable(ch)
+
+	logger.Debug(pgsql.GetPks(md1))
+	logger.Debug(pgsql.GetPks(mds1))
 }
