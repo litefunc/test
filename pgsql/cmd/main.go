@@ -105,4 +105,7 @@ func main() {
 	db.Update(md1).SQL()
 	db.Update(md1).Set("com=?, version=?, bucket=?", md1.Com, md1.Version, md1.Bucket).SQL()
 	db.Delete(md1).SQL()
+
+	var ch chan int
+	pgsql.GetTable(ch)
 }

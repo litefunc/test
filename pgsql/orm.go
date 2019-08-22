@@ -1,6 +1,7 @@
 package pgsql
 
 import (
+	"log"
 	"reflect"
 	"regexp"
 	"strings"
@@ -10,6 +11,12 @@ func GetTable(md interface{}) string {
 	if md == nil {
 		return ""
 	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	var t reflect.Type
 
@@ -44,6 +51,12 @@ func GetCols(md interface{}) []string {
 	if md == nil {
 		return nil
 	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	tb := GetTable(md)
 	t := reflect.TypeOf(md)
@@ -103,6 +116,12 @@ func GetValues(md interface{}) []interface{} {
 		return nil
 	}
 
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err)
+		}
+	}()
+
 	tb := GetTable(md)
 
 	t := reflect.TypeOf(md)
@@ -152,6 +171,12 @@ func GetColsValues(md interface{}) map[string]interface{} {
 	if md == nil {
 		return nil
 	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	tb := GetTable(md)
 
