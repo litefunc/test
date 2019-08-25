@@ -2,113 +2,131 @@ package main
 
 import (
 	"cloud/lib/logger"
-	"cloud/lib/null"
+	"fmt"
 
 	"test/pgsql"
-	"time"
-
-	"cloud/server/ota/config"
-	"os"
 
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 )
 
-type MsFws []MsFw
-
-type MsFw struct {
-	TableName struct{} `json:"-" db:"cloud.msfw"`
-	ID        uint64   `json:"id" db:",pk"`
-	MsFwUnique
-	Bucket string      `json:"bucket"`
-	Obj    string      `json:"obj"`
-	Time   time.Time   `json:"time"`
-	Tag    null.String `json:"tag"`
+type Tb struct {
+	TableName struct{} `json:"-" db:"test.tb_aa"`
+	A         uint64   `json:"id" db:"id,pk"`
+	B         int      `json:"embed_aa" db:"embed_aa"`
+	C         string   `json:"embed_ab" db:"embed_ab"`
+	D         string   `json:"note" db:"note"`
 }
 
-type MsFwUnique struct {
-	Com     uint64 `json:"com"`
-	Version string `json:"ver" sql:",notnull"`
+type Tbs []Tb
+
+type TbAas []TbAa
+
+type TbAa struct {
+	ID uint64 `json:"id" db:",pk"`
+	Embed
+	Note string `json:"note"`
 }
 
-func NewMsFw(version string, com uint64, bk, obj string, time time.Time, tag string) MsFw {
+type TbAbs []TbAb
 
-	u := MsFwUnique{Version: version, Com: com}
-	return MsFw{
-		MsFwUnique: u,
-		Bucket:     bk,
-		Obj:        obj,
-		Time:       time,
-		Tag:        null.NewString(tag),
+type TbAb struct {
+	Pka int    `json:"pka" db:",pk"`
+	Pkb string `json:"pkb" db:",pk"`
+	Embed
+	Note string `json:"note"`
+}
+
+type Embed struct {
+	EmbedAa int    `json:"embed_aa"`
+	EmbedAb string `json:"embed_ab"`
+}
+
+func NewTb(b int, c, d string) Tb {
+
+	return Tb{
+		B: b,
+		C: c,
+		D: d,
 	}
 }
 
-type Account struct {
-	TableName struct{} `json:"-" db:"cloud.account"`
-	Bio
-	Pwd string `json:"pwd"`
+func NewTbAa(a int, b, note string) TbAa {
+
+	u := Embed{EmbedAa: a, EmbedAb: b}
+	return TbAa{
+		Embed: u,
+		Note:  note,
+	}
 }
 
-type Bio struct {
-	ID      uint64      `json:"id" db:"id,pk"`
-	Email   string      `json:"email"`
-	Name    string      `json:"name"`
-	Company uint64      `json:"com_id" sql:"com" db:"com"`
-	Admin   bool        `json:"admin"`
-	Type    string      `json:"type"`
-	Phone   string      `json:"phone"`
-	Note    null.String `json:"note"`
-	Photo   null.String `json:"photo"`
+func NewTbAb(pka int, pkb string, a int, b, note string) TbAb {
+
+	u := Embed{EmbedAa: a, EmbedAb: b}
+	return TbAb{
+		Pka:   pka,
+		Pkb:   pkb,
+		Embed: u,
+		Note:  note,
+	}
 }
 
-type Accounts []Account
+type info struct {
+	tb   string
+	pks  []string
+	cols []string
+	vals []interface{}
+}
+
+func getInfo(md interface{}) info {
+	return info{
+		tb:   pgsql.GetTable(md),
+		pks:  pgsql.GetPks(md),
+		cols: pgsql.GetCols(md),
+		vals: pgsql.GetValues(md),
+	}
+}
 
 func main() {
 
-	config.ParseConfig(os.Getenv("GOPATH")+"/src/cloud/server/ota/config/config.local.json", &config.Config)
-	cfg := &config.Config
-	dbConfig := config.GetPgsqlConfig(cfg.DB)
-	logger.Debug(dbConfig)
+	dbConfig := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "localhost", 5431, "test", "abcd", "test")
+
 	db, _ := pgsql.Connect(dbConfig)
 	defer db.Close()
 
-	md1 := NewMsFw("v1", 1, "bk1", "obj1", time.Now().UTC(), "tag1")
-	md2 := NewMsFw("v2", 2, "bk2", "obj2", time.Now().UTC(), "tag2")
-	mds := MsFws{md1, md2}
+	mda1 := NewTbAa(1, "b1", "n1")
+	mda2 := NewTbAa(2, "b2", "n2")
+	mdas := TbAas{mda1, mda2}
 
-	db.Select(md1).Where("com=? AND gp IN(?)", 1, pq.Array([]uint64{1, 2, 3})).Order("com DESC", "gp ASC").Limit(10).SQL()
-	db.Select(&md1).Where("com=? AND gp IN(?)", 1, pq.Array([]uint64{1, 2, 3})).Order("com DESC", "gp ASC").Limit(10).SQL()
-	db.Select(mds).Where("com=? AND gp IN(?)", 1, pq.Array([]uint64{1, 2, 3})).Order("com DESC", "gp ASC").Limit(10).SQL()
-	db.Select(&mds).Where("com=? AND gp IN(?)", 1, pq.Array([]uint64{1, 2, 3})).Order("com DESC", "gp ASC").Limit(10).SQL()
+	md1 := NewTb(1, "b1", "n1")
+	md2 := NewTb(2, "b2", "n2")
+	mds := Tbs{md1, md2}
+
+	mdb1 := NewTbAb(1, "pkb1", 1, "b1", "n1")
+	mdb2 := NewTbAb(2, "pkb2", 2, "b2", "n2")
+	mdbs := TbAbs{mdb1, mdb2}
+
+	logger.Debug(getInfo(md1))
+	logger.Debug(getInfo(mda1))
+	logger.Debug(getInfo(mdb1))
+	logger.Debug(getInfo(mds))
+	logger.Debug(getInfo(mdas))
+	logger.Debug(getInfo(mdbs))
+
+	db.Select(mda1).Where("com=? AND gp IN(?)", 1, pq.Array([]uint64{1, 2, 3})).Order("com DESC", "gp ASC").Limit(10).SQL()
+	db.Select(&mda1).Where("com=? AND gp IN(?)", 1, pq.Array([]uint64{1, 2, 3})).Order("com DESC", "gp ASC").Limit(10).SQL()
+	db.Select(mdas).Where("com=? AND gp IN(?)", 1, pq.Array([]uint64{1, 2, 3})).Order("com DESC", "gp ASC").Limit(10).SQL()
+	db.Select(&mdas).Where("com=? AND gp IN(?)", 1, pq.Array([]uint64{1, 2, 3})).Order("com DESC", "gp ASC").Limit(10).SQL()
 	db.Select(nil).Where("com=? AND gp IN(?)", 1, pq.Array([]uint64{1, 2, 3})).Order("com DESC", "gp ASC").Limit(10).SQL()
 
-	mds1 := Accounts{}
+	logger.Debug(pgsql.GetValues(mda1))
+	db.Insert(mda1).SQL()
 
-	if err := db.Select(&mds1).Run(); err != nil {
-		logger.Error(err)
-	}
-	for i := range mds1 {
-		logger.Debug(mds1[i])
-	}
-
-	mds1 = Accounts{}
-	if err := db.DB.Select(&mds1, "SELECT * FROM account"); err != nil {
-		logger.Error(err)
-	}
-	for i := range mds1 {
-		logger.Debug(mds1[i])
-	}
-
-	logger.Debug(pgsql.GetValues(md1))
-	db.Insert(md1).SQL()
-
-	db.Update(md1).SQL()
-	db.Update(md1).Set("com=?, version=?, bucket=?", md1.Com, md1.Version, md1.Bucket).SQL()
-	db.Delete(md1).SQL()
+	db.Update(mda1).SQL()
+	db.Update(mda1).Set("embed_aa=?, embed_ab=?, note=?", mda1.EmbedAa, mda1.EmbedAb, mda1.Note).SQL()
+	db.Delete(mda1).SQL()
 
 	var ch chan int
-	pgsql.GetTable(ch)
+	getInfo(ch)
 
-	logger.Debug(pgsql.GetPks(md1))
-	logger.Debug(pgsql.GetPks(mds1))
 }
