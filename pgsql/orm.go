@@ -284,6 +284,69 @@ func getColsValues(t reflect.Type, v reflect.Value, tb string, cols map[string]i
 	return cols
 }
 
+func GetSerial(md interface{}) string {
+	if md == nil {
+		return ""
+	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err)
+		}
+	}()
+
+	tb := GetTable(md)
+	t := reflect.TypeOf(md)
+	v := reflect.ValueOf(md)
+
+	kindOfJ := v.Kind()
+	if kindOfJ == reflect.Ptr {
+		t = t.Elem()
+		if t.Kind() == reflect.Slice {
+			t = t.Elem()
+		}
+		var serial string
+		return getSerial(t, tb, serial)
+	}
+
+	if t.Kind() == reflect.Slice {
+		t = t.Elem()
+	}
+	var serial string
+
+	return getSerial(t, tb, serial)
+}
+
+func getSerial(t reflect.Type, tb string, serial string) string {
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		tag := field.Tag.Get("db")
+		if tag == tb {
+			continue
+		}
+
+		if field.Type.Kind() == reflect.Struct && field.Anonymous {
+			serial = getSerial(field.Type, tb, serial)
+			continue
+		}
+
+		if strings.Contains(tag, ",serial") {
+
+			strs := strings.Split(tag, ",")
+			column := strs[0]
+
+			if column != "" {
+				serial = column
+			} else {
+				serial = toSnakeCase(t.Field(i).Name)
+			}
+
+		}
+
+	}
+	return serial
+}
+
 func toSnakeCase(str string) string {
 
 	matchFirstCap := regexp.MustCompile("(.)([A-Z][a-z]+)")

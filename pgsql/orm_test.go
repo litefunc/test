@@ -9,7 +9,7 @@ import (
 
 type Tb struct {
 	TableName struct{} `json:"-" db:"test.tb_aa"`
-	A         uint64   `json:"id" db:"id,pk"`
+	A         uint64   `json:"id" db:"id,pk,serial"`
 	B         int      `json:"embed_aa" db:"embed_aa"`
 	C         string   `json:"embed_ab" db:"embed_ab"`
 	D         string   `json:"note" db:"note"`
@@ -20,7 +20,7 @@ type Tbs []Tb
 type TbAas []TbAa
 
 type TbAa struct {
-	ID uint64 `json:"id" db:",pk"`
+	ID uint64 `json:"id" db:",pk,serial"`
 	Embed
 	Note string `json:"note"`
 }
@@ -88,25 +88,29 @@ func TestGetTableInfo(t *testing.T) {
 	pks2 := []string{"pka", "pkb"}
 	cols1 := []string{"id", "embed_aa", "embed_ab", "note"}
 	cols2 := []string{"pka", "pkb", "embed_aa", "embed_ab", "note"}
+	serial1 := "id"
+	serial2 := ""
 	f := fmt.Sprintf
 
 	for _, v := range []struct {
-		name string
-		md   interface{}
-		tb   string
-		pks  []string
-		cols []string
+		name   string
+		md     interface{}
+		tb     string
+		pks    []string
+		cols   []string
+		serial string
 	}{
-		{"Tb", md1, "test.tb_aa", pks1, cols1},
-		{"Tbs", mds, "test.tb_aa", pks1, cols1},
-		{"TbAa", mda1, "tb_aa", pks1, cols1},
-		{"TbAas", mdas, "tb_aa", pks1, cols1},
-		{"TbAb", mdb1, "tb_ab", pks2, cols2},
-		{"TbAbs", mdbs, "tb_ab", pks2, cols2},
+		{"Tb", md1, "test.tb_aa", pks1, cols1, serial1},
+		{"Tbs", mds, "test.tb_aa", pks1, cols1, serial1},
+		{"TbAa", mda1, "tb_aa", pks1, cols1, serial1},
+		{"TbAas", mdas, "tb_aa", pks1, cols1, serial1},
+		{"TbAb", mdb1, "tb_ab", pks2, cols2, serial2},
+		{"TbAbs", mdbs, "tb_ab", pks2, cols2, serial2},
 	} {
 		t.Run(f(`getTable=%s`, v.name), testGetTable(v.md, v.tb))
 		t.Run(f(`getPks=%s`, v.name), testGetPks(v.md, v.pks))
 		t.Run(f(`getCols=%s`, v.name), testGetCols(v.md, v.cols))
+		t.Run(f(`getSerial=%s`, v.name), testGetSerial(v.md, v.serial))
 	}
 }
 
@@ -131,6 +135,15 @@ func testGetPks(md interface{}, want []string) func(t *testing.T) {
 func testGetCols(md interface{}, want []string) func(t *testing.T) {
 	f := func(t *testing.T) {
 		if got := GetCols(md); !cmp.Equal(got, want) {
+			t.Errorf(`want:%v, got:%v`, want, got)
+		}
+	}
+	return f
+}
+
+func testGetSerial(md interface{}, want string) func(t *testing.T) {
+	f := func(t *testing.T) {
+		if got := GetSerial(md); !cmp.Equal(got, want) {
 			t.Errorf(`want:%v, got:%v`, want, got)
 		}
 	}
