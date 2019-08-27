@@ -6,6 +6,7 @@ import (
 	"test/pgsql/query"
 
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
 
 type Exec struct {
@@ -19,9 +20,6 @@ func NewExec(db *sqlx.DB, q query.Query, md interface{}) Exec {
 }
 
 func (db Exec) Run() (sql.Result, error) {
-	logger.Debug(db.md)
-	logger.Debug(db.q.SQL())
-	logger.Debug(db.q.Args()...)
 
 	result, err := db.DB.Exec(db.q.SQL(), db.q.Args()...)
 	if err != nil {

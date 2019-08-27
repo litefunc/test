@@ -9,7 +9,7 @@ import (
 
 type Tb struct {
 	TableName struct{} `json:"-" db:"test.tb_aa"`
-	A         uint64   `json:"id" db:"id,pk,serial"`
+	A         int64    `json:"id" db:"id,pk,serial"`
 	B         int      `json:"embed_aa" db:"embed_aa"`
 	C         string   `json:"embed_ab" db:"embed_ab"`
 	D         string   `json:"note" db:"note"`
@@ -20,7 +20,7 @@ type Tbs []Tb
 type TbAas []TbAa
 
 type TbAa struct {
-	ID uint64 `json:"id" db:",pk,serial"`
+	ID int64 `json:"id" db:",pk,serial"`
 	Embed
 	Note string `json:"note"`
 }

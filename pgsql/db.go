@@ -32,7 +32,31 @@ func (db DB) Close() error {
 }
 
 func (db DB) Insert(md interface{}) Exec {
-	return NewExec(db.DB, db.q.Insert(GetTable(md), GetCols(md), GetValues(md)...), md)
+
+	var cols []string
+	var vals []interface{}
+
+	s := GetSerial(md)
+	logger.Debug(s)
+	// m := GetColsValues(md)
+	// for k, v := range m {
+	// 	logger.Debug(k, v)
+	// 	if k != s {
+	// 		cols = append(cols, k)
+	// 		vals = append(vals, v)
+	// 	}
+	// }
+	cols1 := GetCols(md)
+	vals1 := GetValues(md)
+
+	for i := range cols1 {
+		if cols1[i] != s {
+			cols = append(cols, cols1[i])
+			vals = append(vals, vals1[i])
+		}
+	}
+
+	return NewExec(db.DB, db.q.Insert(GetTable(md), cols, vals...), md)
 }
 
 func (db DB) Select(md interface{}) Query {

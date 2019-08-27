@@ -268,9 +268,9 @@ func getColsValues(t reflect.Type, v reflect.Value, tb string, cols map[string]i
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 
-		column := field.Tag.Get("db")
+		tag := field.Tag.Get("db")
 
-		if column == tb {
+		if tag == tb {
 			continue
 		}
 
@@ -278,7 +278,19 @@ func getColsValues(t reflect.Type, v reflect.Value, tb string, cols map[string]i
 			cols = getColsValues(field.Type, v.Field(i), tb, cols)
 			continue
 		}
-		cols[toSnakeCase(t.Field(i).Name)] = v.Field(i).Interface()
+
+		if tag != "" {
+
+			strs := strings.Split(tag, ",")
+			if strs[0] != "" {
+				cols[strs[0]] = v.Field(i).Interface()
+			} else {
+				cols[toSnakeCase(t.Field(i).Name)] = v.Field(i).Interface()
+			}
+
+		} else {
+			cols[toSnakeCase(t.Field(i).Name)] = v.Field(i).Interface()
+		}
 
 	}
 	return cols
@@ -305,19 +317,19 @@ func GetSerial(md interface{}) string {
 		if t.Kind() == reflect.Slice {
 			t = t.Elem()
 		}
-		var serial string
-		return getSerial(t, tb, serial)
+		return getSerial(t, tb)
 	}
 
 	if t.Kind() == reflect.Slice {
 		t = t.Elem()
 	}
-	var serial string
 
-	return getSerial(t, tb, serial)
+	return getSerial(t, tb)
 }
 
-func getSerial(t reflect.Type, tb string, serial string) string {
+func getSerial(t reflect.Type, tb string) string {
+	var serial string
+
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 		tag := field.Tag.Get("db")
@@ -326,7 +338,7 @@ func getSerial(t reflect.Type, tb string, serial string) string {
 		}
 
 		if field.Type.Kind() == reflect.Struct && field.Anonymous {
-			serial = getSerial(field.Type, tb, serial)
+			serial = getSerial(field.Type, tb)
 			continue
 		}
 
