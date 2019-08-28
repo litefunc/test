@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	_ "github.com/lib/pq"
 )
 
@@ -15,53 +16,86 @@ func TestBasicCRUD(t *testing.T) {
 	db, _ := Connect(dbConfig)
 	defer db.Close()
 
-	if _, err := db.Insert(md1).Run(); err != nil {
-		t.Error(err)
-		return
-	}
-
-	if _, err := db.Insert(md2).Run(); err != nil {
-		t.Error(err)
-		return
-	}
-
-	// res, err := db.Insert(md1).Returning("id").Run()
-	// if err != nil {
-	// 	t.Error(err)
-	// 	return
-	// }
-	// id, err := res.LastInsertId()
-	// if err != nil {
-	// 	t.Error(err)
-	// 	return
-	// }
-	// md1.A = id
-
-	// res, err = db.Insert(md2).Returning("id").Run()
-	// if err != nil {
-	// 	t.Error(err)
-	// 	return
-	// }
-	// id, err = res.LastInsertId()
-	// if err != nil {
-	// 	t.Error(err)
-	// 	return
-	// }
-	// md2.A = id
-
-	// logger.Debug(md1, md2)
-
 	var mds []Tb
 	db.Select(&mds).SQL()
 	if err := db.Select(&mds).Run(); err != nil {
 		t.Error(err)
 		return
 	}
-	logger.Debug(mds)
 
-	if _, err := db.Delete(mds).Run(); err != nil {
+	// len(mds) should be 0
+	if err := ModelsEqual(db, mds); err != nil {
 		t.Error(err)
 		return
 	}
+
+	if err := db.Insert(md1).Returning("id").Run().Scan(&md1.A); err != nil {
+		t.Error(err)
+		return
+	}
+
+	if err := db.Insert(md2).Returning("id").Run().Scan(&md2.A); err != nil {
+		t.Error(err)
+		return
+	}
+
+	// select 1 row
+	if err := ModelEqual(db, md1); err != nil {
+		t.Error(err)
+		return
+	}
+
+	if err := ModelsEqual(db, append(mds, md1, md2)); err != nil {
+		t.Error(err)
+		return
+	}
+
+	if _, err := db.Truncate(mds).Run(); err != nil {
+		t.Error(err)
+		return
+	}
+
+	db.Select(&mds).SQL()
+	if err := db.Select(&mds).Run(); err != nil {
+		t.Error(err)
+		return
+	}
+	// len(mds) should be 0
+	if err := ModelsEqual(db, mds); err != nil {
+		t.Error(err)
+		return
+	}
+
+}
+
+func ModelsEqual(db *DB, want Tbs) error {
+	var got Tbs
+	if err := db.Select(&got).Run(); err != nil {
+		logger.Error(err)
+		return err
+	}
+
+	if len(want) != len(got) {
+		return fmt.Errorf("\nwant:%+v,\ngot :%+v", want, got)
+	}
+
+	if !cmp.Equal(want, got) {
+		return fmt.Errorf("\nwant:%+v,\ngot :%+v", want, got)
+	}
+	return nil
+
+}
+
+func ModelEqual(db *DB, want Tb) error {
+	var got Tb
+	if err := db.Select(&got).Run(); err != nil {
+		logger.Error(err)
+		return err
+	}
+
+	if !cmp.Equal(want, got) {
+		return fmt.Errorf("\nwant:%+v,\ngot :%+v", want, got)
+	}
+	return nil
 
 }

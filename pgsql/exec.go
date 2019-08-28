@@ -48,7 +48,7 @@ func (db Exec) Set(condition string, args ...interface{}) Exec {
 	return db
 }
 
-func (db Exec) Returning(cols ...string) Exec {
+func (db Exec) Returning(cols ...string) QueryRow {
 	db.q = db.q.Returning(cols...)
-	return db
+	return NewQueryRow(db.DB, db.q)
 }

@@ -38,14 +38,7 @@ func (db DB) Insert(md interface{}) Exec {
 
 	s := GetSerial(md)
 	logger.Debug(s)
-	// m := GetColsValues(md)
-	// for k, v := range m {
-	// 	logger.Debug(k, v)
-	// 	if k != s {
-	// 		cols = append(cols, k)
-	// 		vals = append(vals, v)
-	// 	}
-	// }
+
 	cols1 := GetCols(md)
 	vals1 := GetValues(md)
 
@@ -60,6 +53,7 @@ func (db DB) Insert(md interface{}) Exec {
 }
 
 func (db DB) Select(md interface{}) Query {
+
 	q := NewQuery(db.DB, db.q.Select(GetTable(md), GetCols(md)...), md)
 	return q
 }
@@ -73,6 +67,6 @@ func (db DB) Delete(md interface{}) Exec {
 	return NewExec(db.DB, db.q.Delete(GetTable(md)), md)
 }
 
-func (db DB) DeleteAll(md interface{}) Exec {
-	return NewExec(db.DB, db.q.Delete(GetTable(md)), md)
+func (db DB) Truncate(md interface{}) Exec {
+	return NewExec(db.DB, db.q.Truncate(GetTable(md)), md)
 }

@@ -2,6 +2,8 @@ package pgsql
 
 import (
 	"cloud/lib/logger"
+	"database/sql"
+	"reflect"
 	"test/pgsql/query"
 
 	"github.com/jmoiron/sqlx"
@@ -18,11 +20,29 @@ func NewQuery(db *sqlx.DB, q query.Query, md interface{}) Query {
 }
 
 func (db Query) Run() error {
-	logger.Debug(db.md)
-	logger.Debug(db.q.SQL())
-	logger.Debug(db.q.Args()...)
 
-	if err := db.DB.Select(db.md, db.q.SQL(), db.q.Args()...); err != nil {
+	t := reflect.TypeOf(db.md)
+
+	var slice bool
+	if t.Kind() == reflect.Ptr {
+		if t.Elem().Kind() == reflect.Slice {
+			slice = true
+		}
+	}
+
+	if t.Kind() == reflect.Slice {
+		slice = true
+	}
+
+	if slice {
+		if err := db.DB.Select(db.md, db.q.SQL(), db.q.Args()...); err != nil {
+			logger.Error(err)
+			return err
+		}
+		return nil
+	}
+
+	if err := db.DB.QueryRowx(db.q.SQL(), db.q.Args()...).StructScan(db.md); err != nil {
 		logger.Error(err)
 		return err
 	}
@@ -51,4 +71,26 @@ func (db Query) Order(args ...string) Query {
 func (db Query) Limit(n uint64) Query {
 	db.q = db.q.Limit(n)
 	return db
+}
+
+type QueryRow struct {
+	*sqlx.DB
+	q query.Query
+}
+
+func NewQueryRow(db *sqlx.DB, q query.Query) QueryRow {
+	return QueryRow{DB: db, q: q}
+}
+
+func (db QueryRow) Run() *sql.Row {
+
+	return db.DB.QueryRow(db.q.SQL(), db.q.Args()...)
+}
+
+func (db QueryRow) SQL() string {
+	return db.q.SQL()
+}
+
+func (db QueryRow) Args() []interface{} {
+	return db.q.Args()
 }
