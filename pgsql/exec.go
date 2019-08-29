@@ -21,6 +21,8 @@ func NewExec(db *sqlx.DB, q query.Query, md interface{}) Exec {
 
 func (db Exec) Run() (sql.Result, error) {
 
+	logger.Debug(db.q.SQL(), db.q.Args())
+
 	result, err := db.DB.Exec(db.q.SQL(), db.q.Args()...)
 	if err != nil {
 		logger.Error(err)

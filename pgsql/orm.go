@@ -65,7 +65,7 @@ func GetPks(md interface{}) []string {
 			t = t.Elem()
 		}
 		var cols []string
-		return getCols(t, tb, cols)
+		return getPks(t, tb, cols)
 	}
 
 	if t.Kind() == reflect.Slice {
@@ -191,6 +191,7 @@ func GetValues(md interface{}) []interface{} {
 	kindOfJ := v.Kind()
 	if kindOfJ == reflect.Ptr {
 		t = t.Elem()
+		v = v.Elem()
 		if t.Kind() == reflect.Slice {
 			t = t.Elem()
 			v = v.Elem()
@@ -247,6 +248,7 @@ func GetColsValues(md interface{}) map[string]interface{} {
 	kindOfJ := v.Kind()
 	if kindOfJ == reflect.Ptr {
 		t = t.Elem()
+		v = v.Elem()
 		if t.Kind() == reflect.Slice {
 			t = t.Elem()
 			v = v.Elem()
@@ -280,6 +282,15 @@ func getColsValues(t reflect.Type, v reflect.Value, tb string, cols map[string]i
 		}
 
 		if tag != "" {
+
+			if v.Kind() == reflect.Ptr {
+				t = t.Elem()
+				v = v.Elem()
+				if t.Kind() == reflect.Slice {
+					t = t.Elem()
+					v = v.Elem()
+				}
+			}
 
 			strs := strings.Split(tag, ",")
 			if strs[0] != "" {
@@ -339,7 +350,10 @@ func getSerial(t reflect.Type, tb string) string {
 
 		if field.Type.Kind() == reflect.Struct && field.Anonymous {
 			serial = getSerial(field.Type, tb)
-			continue
+			if serial != "" {
+				return serial
+			}
+
 		}
 
 		if strings.Contains(tag, ",serial") {
@@ -352,7 +366,7 @@ func getSerial(t reflect.Type, tb string) string {
 			} else {
 				serial = toSnakeCase(t.Field(i).Name)
 			}
-
+			return serial
 		}
 
 	}

@@ -45,7 +45,6 @@ func (q Query) SQL() string {
 	for i := range qs {
 		sql = strings.Replace(sql, "?", fmt.Sprintf("$%d", i+1), 1)
 	}
-	logger.Debug(sql, q.args)
 	return sql
 }
 

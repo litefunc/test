@@ -20,6 +20,7 @@ func NewQuery(db *sqlx.DB, q query.Query, md interface{}) Query {
 }
 
 func (db Query) Run() error {
+	logger.Debug(db.q.SQL(), db.q.Args())
 
 	t := reflect.TypeOf(db.md)
 
@@ -83,7 +84,7 @@ func NewQueryRow(db *sqlx.DB, q query.Query) QueryRow {
 }
 
 func (db QueryRow) Run() *sql.Row {
-
+	logger.Debug(db.q.SQL(), db.q.Args())
 	return db.DB.QueryRow(db.q.SQL(), db.q.Args()...)
 }
 

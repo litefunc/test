@@ -33,19 +33,31 @@ func TestBasicCRUD(t *testing.T) {
 		t.Error(err)
 		return
 	}
-
 	if err := db.Insert(md2).Returning("id").Run().Scan(&md2.A); err != nil {
 		t.Error(err)
 		return
 	}
 
-	// select 1 row
-	if err := ModelEqual(db, md1); err != nil {
+	md := Tb{A: md1.A}
+	if err := db.SelectByPk(&md).Run(); err != nil {
+		t.Error(err)
+		return
+	}
+	if err := ModelEqual(md1, md); err != nil {
 		t.Error(err)
 		return
 	}
 
 	if err := ModelsEqual(db, append(mds, md1, md2)); err != nil {
+		t.Error(err)
+		return
+	}
+
+	if _, err := db.DeleteByPk(md2).Run(); err != nil {
+		t.Error(err)
+		return
+	}
+	if err := ModelsEqual(db, append(mds, md1)); err != nil {
 		t.Error(err)
 		return
 	}
@@ -86,12 +98,7 @@ func ModelsEqual(db *DB, want Tbs) error {
 
 }
 
-func ModelEqual(db *DB, want Tb) error {
-	var got Tb
-	if err := db.Select(&got).Run(); err != nil {
-		logger.Error(err)
-		return err
-	}
+func ModelEqual(want, got Tb) error {
 
 	if !cmp.Equal(want, got) {
 		return fmt.Errorf("\nwant:%+v,\ngot :%+v", want, got)

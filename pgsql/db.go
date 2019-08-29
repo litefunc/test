@@ -2,6 +2,8 @@ package pgsql
 
 import (
 	"cloud/lib/logger"
+	"fmt"
+	"strings"
 	"test/pgsql/query"
 
 	"github.com/jmoiron/sqlx"
@@ -37,7 +39,6 @@ func (db DB) Insert(md interface{}) Exec {
 	var vals []interface{}
 
 	s := GetSerial(md)
-	logger.Debug(s)
 
 	cols1 := GetCols(md)
 	vals1 := GetValues(md)
@@ -58,6 +59,23 @@ func (db DB) Select(md interface{}) Query {
 	return q
 }
 
+func (db DB) SelectByPk(md interface{}) Query {
+
+	pks := GetPks(md)
+	cvs := GetColsValues(md)
+
+	var cols []string
+	var args []interface{}
+	for _, k := range pks {
+		cols = append(cols, fmt.Sprintf(`%s=?`, k))
+		args = append(args, cvs[k])
+	}
+
+	q := db.q.Select(GetTable(md), GetCols(md)...).Where(strings.Join(cols, " AND "), args...)
+
+	return NewQuery(db.DB, q, md)
+}
+
 func (db DB) Update(md interface{}) Exec {
 	q := db.q.Update(GetTable(md), nil)
 	return NewExec(db.DB, q, md)
@@ -65,6 +83,23 @@ func (db DB) Update(md interface{}) Exec {
 
 func (db DB) Delete(md interface{}) Exec {
 	return NewExec(db.DB, db.q.Delete(GetTable(md)), md)
+}
+
+func (db DB) DeleteByPk(md interface{}) Exec {
+
+	pks := GetPks(md)
+	cvs := GetColsValues(md)
+
+	var cols []string
+	var args []interface{}
+	for _, k := range pks {
+		cols = append(cols, fmt.Sprintf(`%s=?`, k))
+		args = append(args, cvs[k])
+	}
+
+	q := db.q.Delete(GetTable(md)).Where(strings.Join(cols, " AND "), args...)
+
+	return NewExec(db.DB, q, md)
 }
 
 func (db DB) Truncate(md interface{}) Exec {

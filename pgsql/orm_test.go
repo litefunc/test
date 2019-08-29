@@ -106,6 +106,13 @@ func TestGetTableInfo(t *testing.T) {
 		{"TbAas", mdas, "tb_aa", pks1, cols1, serial1},
 		{"TbAb", mdb1, "tb_ab", pks2, cols2, serial2},
 		{"TbAbs", mdbs, "tb_ab", pks2, cols2, serial2},
+
+		{"&Tb", &md1, "test.tb_aa", pks1, cols1, serial1},
+		{"&Tbs", &mds, "test.tb_aa", pks1, cols1, serial1},
+		{"&TbAa", &mda1, "tb_aa", pks1, cols1, serial1},
+		{"&TbAas", &mdas, "tb_aa", pks1, cols1, serial1},
+		{"&TbAb", &mdb1, "tb_ab", pks2, cols2, serial2},
+		{"&TbAbs", &mdbs, "tb_ab", pks2, cols2, serial2},
 	} {
 		t.Run(f(`getTable=%s`, v.name), testGetTable(v.md, v.tb))
 		t.Run(f(`getPks=%s`, v.name), testGetPks(v.md, v.pks))
