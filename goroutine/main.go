@@ -2,10 +2,19 @@ package main
 
 import (
 	"fmt"
+	"runtime"
 	"time"
 )
 
 func main() {
+
+	fmt.Println(runtime.NumCPU())
+	fmt.Println(runtime.GOMAXPROCS(0))
+	runtime.GOMAXPROCS(1)
+	fmt.Println(runtime.NumCPU())
+
+	fmt.Println("start", runtime.GOMAXPROCS(1), runtime.NumGoroutine())
+
 	var n int
 	m := 10
 	for i := 0; i < m; i++ {
@@ -18,6 +27,7 @@ func main() {
 				if n == m {
 					fmt.Println(n)
 					n = 0
+					fmt.Println(runtime.NumGoroutine())
 					fmt.Println()
 				}
 			}
