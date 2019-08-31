@@ -8,11 +8,11 @@ import (
 )
 
 type Tb struct {
-	TableName struct{} `json:"-" db:"test.tb_aa"`
-	A         int64    `json:"id" db:"id,pk,serial"`
-	B         int      `json:"embed_aa" db:"embed_aa"`
-	C         string   `json:"embed_ab" db:"embed_ab"`
-	D         string   `json:"note" db:"note"`
+	TableName struct{} `json:"-" pg:"test.tb_aa"`
+	A         int64    `json:"id" pg:"id,pk,serial"`
+	B         int      `json:"embed_aa" pg:"embed_aa"`
+	C         string   `json:"embed_ab" pg:"embed_ab"`
+	D         string   `json:"note" pg:"note"`
 }
 
 type Tbs []Tb
@@ -20,7 +20,7 @@ type Tbs []Tb
 type TbAas []TbAa
 
 type TbAa struct {
-	ID int64 `json:"id" db:",pk,serial"`
+	ID int64 `json:"id" pg:",pk,serial"`
 	Embed
 	Note string `json:"note"`
 }
@@ -28,8 +28,8 @@ type TbAa struct {
 type TbAbs []TbAb
 
 type TbAb struct {
-	Pka int    `json:"pka" db:",pk"`
-	Pkb string `json:"pkb" db:",pk"`
+	Pka int    `json:"pka" pg:",pk"`
+	Pkb string `json:"pkb" pg:",pk"`
 	Embed
 	Note string `json:"note"`
 }

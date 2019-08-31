@@ -6,6 +6,7 @@ import (
 )
 
 func (q Query) Update(tb string, set map[string]interface{}) Query {
+	q.qt = UPDATE
 	if set != nil {
 		var cols []string
 		var args []interface{}

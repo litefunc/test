@@ -37,7 +37,7 @@ func GetTable(md interface{}) string {
 
 	for i := 0; i < t.NumField(); i++ {
 		if strings.ToLower(t.Field(i).Name) == "tablename" {
-			return t.Field(i).Tag.Get("db")
+			return t.Field(i).Tag.Get("pg")
 		}
 	}
 	return toSnakeCase(t.Name())
@@ -79,7 +79,7 @@ func GetPks(md interface{}) []string {
 func getPks(t reflect.Type, tb string, cols []string) []string {
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
-		tag := field.Tag.Get("db")
+		tag := field.Tag.Get("pg")
 		if tag == tb {
 			continue
 		}
@@ -147,7 +147,7 @@ func getCols(t reflect.Type, tb string, cols []string) []string {
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 
-		tag := field.Tag.Get("db")
+		tag := field.Tag.Get("pg")
 		if tag == tb {
 			continue
 		}
@@ -213,7 +213,7 @@ func getValues(t reflect.Type, v reflect.Value, tb string, cols []interface{}) [
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 
-		column := field.Tag.Get("db")
+		column := field.Tag.Get("pg")
 
 		if column == tb {
 			continue
@@ -270,7 +270,7 @@ func getColsValues(t reflect.Type, v reflect.Value, tb string, cols map[string]i
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 
-		tag := field.Tag.Get("db")
+		tag := field.Tag.Get("pg")
 
 		if tag == tb {
 			continue
@@ -343,7 +343,7 @@ func getSerial(t reflect.Type, tb string) string {
 
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
-		tag := field.Tag.Get("db")
+		tag := field.Tag.Get("pg")
 		if tag == tb {
 			continue
 		}

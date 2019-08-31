@@ -10,12 +10,19 @@ import (
 )
 
 type Query struct {
-	*sqlx.DB
+	DB Database
 	q  query.Query
 	md interface{}
 }
 
-func NewQuery(db *sqlx.DB, q query.Query, md interface{}) Query {
+type Database interface {
+	Select(dest interface{}, query string, args ...interface{}) error
+	QueryRowx(query string, args ...interface{}) *sqlx.Row
+	QueryRow(query string, args ...interface{}) *sql.Row
+	Exec(query string, args ...interface{}) (sql.Result, error)
+}
+
+func NewQuery(db Database, q query.Query, md interface{}) Query {
 	return Query{DB: db, q: q, md: md}
 }
 
@@ -64,8 +71,18 @@ func (db Query) Where(condition string, args ...interface{}) Query {
 	return db
 }
 
-func (db Query) Order(args ...string) Query {
-	db.q = db.q.Order(args...)
+func (db Query) GroupBy(cols ...string) Query {
+	db.q = db.q.GroupBy(cols...)
+	return db
+}
+
+func (db Query) Having(condition string, args ...interface{}) Query {
+	db.q = db.q.Having(condition, args...)
+	return db
+}
+
+func (db Query) OrderBy(args ...string) Query {
+	db.q = db.q.OrderBy(args...)
 	return db
 }
 
@@ -74,24 +91,7 @@ func (db Query) Limit(n uint64) Query {
 	return db
 }
 
-type QueryRow struct {
-	*sqlx.DB
-	q query.Query
-}
-
-func NewQueryRow(db *sqlx.DB, q query.Query) QueryRow {
-	return QueryRow{DB: db, q: q}
-}
-
-func (db QueryRow) Run() *sql.Row {
-	logger.Debug(db.q.SQL(), db.q.Args())
-	return db.DB.QueryRow(db.q.SQL(), db.q.Args()...)
-}
-
-func (db QueryRow) SQL() string {
-	return db.q.SQL()
-}
-
-func (db QueryRow) Args() []interface{} {
-	return db.q.Args()
+func (db Query) Offset(n uint64) Query {
+	db.q = db.q.Offset(n)
+	return db
 }

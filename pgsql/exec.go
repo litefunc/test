@@ -3,25 +3,34 @@ package pgsql
 import (
 	"cloud/lib/logger"
 	"database/sql"
+	"errors"
+	"strings"
 	"test/pgsql/query"
 
-	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
 type Exec struct {
-	*sqlx.DB
+	DB Database
 	q  query.Query
 	md interface{}
 }
 
-func NewExec(db *sqlx.DB, q query.Query, md interface{}) Exec {
+func NewExec(db Database, q query.Query, md interface{}) Exec {
 	return Exec{DB: db, q: q, md: md}
 }
+
+var ErrDeleteWithoutCondition = errors.New(`pgsql: DELETE must have condition. To delete all rows, use TRUNCATE instead`)
 
 func (db Exec) Run() (sql.Result, error) {
 
 	logger.Debug(db.q.SQL(), db.q.Args())
+
+	if db.q.Type() == query.DELETE {
+		if !strings.Contains(db.q.SQL(), "WHERE") {
+			return nil, ErrDeleteWithoutCondition
+		}
+	}
 
 	result, err := db.DB.Exec(db.q.SQL(), db.q.Args()...)
 	if err != nil {

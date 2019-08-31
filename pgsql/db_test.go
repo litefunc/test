@@ -16,72 +16,109 @@ func TestBasicCRUD(t *testing.T) {
 	db, _ := Connect(dbConfig)
 	defer db.Close()
 
-	var mds []Tb
-	db.Select(&mds).SQL()
-	if err := db.Select(&mds).Run(); err != nil {
+	var mdas TbAas
+	db.Select(&mdas).SQL()
+	if err := db.Select(&mdas).Run(); err != nil {
+		t.Error(err)
+		return
+	}
+	// len(mdas) should be 0
+	if err := ModelsEqual(db, mdas); err != nil {
 		t.Error(err)
 		return
 	}
 
-	// len(mds) should be 0
-	if err := ModelsEqual(db, mds); err != nil {
+	defer db.Truncate(mdas).Run()
+
+	if err := db.Insert(mda1).Returning("id").Run().Scan(&mda1.ID); err != nil {
+		t.Error(err)
+		return
+	}
+	if err := db.Insert(mda2).Returning("id").Run().Scan(&mda2.ID); err != nil {
 		t.Error(err)
 		return
 	}
 
-	if err := db.Insert(md1).Returning("id").Run().Scan(&md1.A); err != nil {
-		t.Error(err)
-		return
-	}
-	if err := db.Insert(md2).Returning("id").Run().Scan(&md2.A); err != nil {
-		t.Error(err)
-		return
-	}
-
-	md := Tb{A: md1.A}
+	md := TbAa{ID: mda1.ID}
 	if err := db.SelectByPk(&md).Run(); err != nil {
 		t.Error(err)
 		return
 	}
-	if err := ModelEqual(md1, md); err != nil {
+	if err := ModelEqual(mda1, md); err != nil {
 		t.Error(err)
 		return
 	}
 
-	if err := ModelsEqual(db, append(mds, md1, md2)); err != nil {
+	if err := ModelsEqual(db, append(mdas, mda1, mda2)); err != nil {
 		t.Error(err)
 		return
 	}
 
-	if _, err := db.DeleteByPk(md2).Run(); err != nil {
-		t.Error(err)
-		return
-	}
-	if err := ModelsEqual(db, append(mds, md1)); err != nil {
-		t.Error(err)
-		return
-	}
-
-	if _, err := db.Truncate(mds).Run(); err != nil {
+	mda2.EmbedAa = mda2.EmbedAa * 10
+	mda2.EmbedAb = mda2.EmbedAb + mda2.EmbedAb
+	mda2.Note = mda2.Note + mda2.Note
+	if _, err := db.UpdateByPk(mda2).Run(); err != nil {
 		t.Error(err)
 		return
 	}
 
-	db.Select(&mds).SQL()
-	if err := db.Select(&mds).Run(); err != nil {
+	if err := ModelsEqual(db, append(mdas, mda1, mda2)); err != nil {
 		t.Error(err)
 		return
 	}
-	// len(mds) should be 0
-	if err := ModelsEqual(db, mds); err != nil {
+
+	var n int
+	if err := db.Count(mdas).Run().Scan(&n); err != nil {
+		t.Error(err)
+		return
+	}
+	if n != 2 {
+		t.Error(n)
+	}
+
+	n = 0
+	if err := db.CountDistinct(mdas, "note").Run().Scan(&n); err != nil {
+		t.Error(err)
+		return
+	}
+	if n != 2 {
+		t.Error(n)
+	}
+
+	if _, err := db.Delete(mda2).Run(); err != ErrDeleteWithoutCondition {
+		t.Error(err)
+		return
+	}
+
+	if _, err := db.DeleteByPk(mda2).Run(); err != nil {
+		t.Error(err)
+		return
+	}
+	if err := ModelsEqual(db, append(mdas, mda1)); err != nil {
+		t.Error(err)
+		return
+	}
+
+	if _, err := db.Truncate(mdas).Run(); err != nil {
+		t.Error(err)
+		return
+	}
+
+	db.Select(&mdas).SQL()
+	if err := db.Select(&mdas).Run(); err != nil {
+		t.Error(err)
+		return
+	}
+	// len(mdas) should be 0
+	if err := ModelsEqual(db, mdas); err != nil {
 		t.Error(err)
 		return
 	}
 
 }
 
-func ModelsEqual(db *DB, want Tbs) error {
-	var got Tbs
+func ModelsEqual(db *DB, want TbAas) error {
+	var got TbAas
 	if err := db.Select(&got).Run(); err != nil {
 		logger.Error(err)
 		return err
@@ -98,7 +135,7 @@ func ModelsEqual(db *DB, want Tbs) error {
 
 }
 
-func ModelEqual(want, got Tb) error {
+func ModelEqual(want, got TbAa) error {
 
 	if !cmp.Equal(want, got) {
 		return fmt.Errorf("\nwant:%+v,\ngot :%+v", want, got)

@@ -22,7 +22,13 @@ func Connect(dbConfig string) (*DB, error) {
 		logger.Error(err)
 		return nil, err
 	}
-	return &DB{DB: db}, nil
+
+	return NewDB(db), nil
+}
+
+func NewDB(db *sqlx.DB) *DB {
+	db.MapperFunc(toSnakeCase)
+	return &DB{DB: db}
 }
 
 func (db DB) Close() error {
@@ -31,6 +37,15 @@ func (db DB) Close() error {
 		return err
 	}
 	return nil
+}
+
+func (db DB) Begin() (*Tx, error) {
+	tx, err := db.DB.Beginx()
+	if err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+	return NewTx(tx), nil
 }
 
 func (db DB) Insert(md interface{}) Exec {
@@ -81,6 +96,23 @@ func (db DB) Update(md interface{}) Exec {
 	return NewExec(db.DB, q, md)
 }
 
+func (db DB) UpdateByPk(md interface{}) Exec {
+	pks := GetPks(md)
+	cvs := GetColsValues(md)
+
+	var cols []string
+	var args []interface{}
+	for _, k := range pks {
+		cols = append(cols, fmt.Sprintf(`%s=?`, k))
+		args = append(args, cvs[k])
+		delete(cvs, k)
+	}
+
+	q := db.q.Update(GetTable(md), cvs).Where(strings.Join(cols, " AND "), args...)
+
+	return NewExec(db.DB, q, md)
+}
+
 func (db DB) Delete(md interface{}) Exec {
 	return NewExec(db.DB, db.q.Delete(GetTable(md)), md)
 }
@@ -104,4 +136,22 @@ func (db DB) DeleteByPk(md interface{}) Exec {
 
 func (db DB) Truncate(md interface{}) Exec {
 	return NewExec(db.DB, db.q.Truncate(GetTable(md)), md)
+}
+
+func (db DB) Count(md interface{}) QueryRow {
+
+	q := NewQueryRow(db.DB, db.q.Count(GetTable(md)))
+	return q
+}
+
+func (db DB) CountColumn(md interface{}, col string) QueryRow {
+
+	q := NewQueryRow(db.DB, db.q.CountColumn(GetTable(md), col))
+	return q
+}
+
+func (db DB) CountDistinct(md interface{}, col string) QueryRow {
+
+	q := NewQueryRow(db.DB, db.q.CountDistinct(GetTable(md), col))
+	return q
 }

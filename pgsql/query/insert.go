@@ -6,6 +6,7 @@ import (
 )
 
 func (q Query) Insert(tb string, cols []string, args ...interface{}) Query {
+	q.qt = INSERT
 
 	var vals []string
 	for i := range cols {
