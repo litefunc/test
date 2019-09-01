@@ -84,6 +84,23 @@ func (tx Tx) Update(md interface{}) Exec {
 	return NewExec(tx.Tx, q, md)
 }
 
+func (tx Tx) UpdateByPk(md interface{}) Exec {
+	pks := GetPks(md)
+	cvs := GetColsValues(md)
+
+	var cols []string
+	var args []interface{}
+	for _, k := range pks {
+		cols = append(cols, fmt.Sprintf(`%s=?`, k))
+		args = append(args, cvs[k])
+		delete(cvs, k)
+	}
+
+	q := tx.q.Update(GetTable(md), cvs).Where(strings.Join(cols, " AND "), args...)
+
+	return NewExec(tx.Tx, q, md)
+}
+
 func (tx Tx) Delete(md interface{}) Exec {
 	return NewExec(tx.Tx, tx.q.Delete(GetTable(md)), md)
 }
@@ -107,4 +124,22 @@ func (tx Tx) DeleteByPk(md interface{}) Exec {
 
 func (tx Tx) Truncate(md interface{}) Exec {
 	return NewExec(tx.Tx, tx.q.Truncate(GetTable(md)), md)
+}
+
+func (tx Tx) Count(md interface{}) QueryRow {
+
+	q := NewQueryRow(tx.Tx, tx.q.Count(GetTable(md)))
+	return q
+}
+
+func (tx Tx) CountColumn(md interface{}, col string) QueryRow {
+
+	q := NewQueryRow(tx.Tx, tx.q.CountColumn(GetTable(md), col))
+	return q
+}
+
+func (tx Tx) CountDistinct(md interface{}, col string) QueryRow {
+
+	q := NewQueryRow(tx.Tx, tx.q.CountDistinct(GetTable(md), col))
+	return q
 }
