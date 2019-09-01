@@ -2,6 +2,7 @@ package pgsql
 
 import (
 	"cloud/lib/logger"
+	"database/sql"
 	"fmt"
 	"testing"
 
@@ -13,7 +14,7 @@ func TestBasicCRUD(t *testing.T) {
 
 	dbConfig := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "localhost", 5431, "test", "abcd", "test")
 	db, err := Connect(dbConfig)
-	if err !=nil{
+	if err != nil {
 		t.Error(err)
 		return
 	}
@@ -124,11 +125,10 @@ func TestWhere(t *testing.T) {
 
 	dbConfig := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "localhost", 5431, "test", "abcd", "test")
 	db, err := Connect(dbConfig)
-	if err !=nil{
+	if err != nil {
 		t.Error(err)
 		return
 	}
-
 	defer db.Close()
 
 	var mdas TbAas
@@ -240,4 +240,67 @@ func ModelEqual(want, got TbAa) error {
 	}
 	return nil
 
+}
+
+func Benchmark01pgsqlDB(b *testing.B) {
+	db := setupBenchData()
+	defer db.Close()
+	defer db.Truncate(mdas).Run()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		db.Select(&TbAas{}).Run()
+	}
+}
+
+func Benchmark02sqlxDB(b *testing.B) {
+	db := setupBenchData()
+	defer db.Close()
+	defer db.Truncate(mdas).Run()
+	sqlxDB := db.DB
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		sqlxDB.Select(&TbAas{}, "SELECT id, embed_aa, embed_ab, note FROM tb_aa")
+	}
+}
+func Benchmark03sqlDB(b *testing.B) {
+	db := setupBenchData()
+	defer db.Close()
+	defer db.Truncate(mdas).Run()
+	sqlDB := db.DB.DB
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		sqlSelect(sqlDB)
+	}
+}
+
+func setupBenchData() *DB {
+	dbConfig := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "localhost", 5431, "test", "abcd", "test")
+	db, err := Connect(dbConfig)
+	if err != nil {
+		logger.Panic(err)
+	}
+	for i := 0; i < 1000; i++ {
+		if _, err := db.Insert(mda1).Run(); err != nil {
+			logger.Panic(err)
+		}
+	}
+	return db
+}
+
+func sqlSelect(db *sql.DB) {
+	rows, err := db.Query("SELECT id, embed_aa, embed_ab, note FROM tb_aa")
+	if err != nil {
+		panic(err)
+	}
+	var mds TbAas
+	for rows.Next() {
+		var md TbAa
+		if err := rows.Scan(&md.ID, &md.EmbedAa, &md.EmbedAb, &md.Note); err != nil {
+			panic(err)
+		}
+		mds = append(mds, md)
+	}
 }

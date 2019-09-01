@@ -24,7 +24,7 @@ var ErrDeleteWithoutCondition = errors.New(`pgsql: DELETE must have condition. T
 
 func (db Exec) Run() (sql.Result, error) {
 
-	logger.Debug(db.q.SQL(), db.q.Args())
+	// logger.Debug(db.q.SQL(), db.q.Args())
 
 	if db.q.Type() == query.DELETE {
 		if !strings.Contains(db.q.SQL(), "WHERE") {

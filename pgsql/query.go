@@ -27,7 +27,7 @@ func NewQuery(db Database, q query.Query, md interface{}) Query {
 }
 
 func (db Query) Run() error {
-	logger.Debug(db.q.SQL(), db.q.Args())
+	// logger.Debug(db.q.SQL(), db.q.Args())
 
 	t := reflect.TypeOf(db.md)
 
