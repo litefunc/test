@@ -52,6 +52,21 @@ func BenchmarkSlice06(b *testing.B) {
 	}
 }
 
+func BenchmarkSlice07(b *testing.B) {
+
+	for i := 0; i < b.N; i++ {
+		var n int
+		for i := 0; i < 1000; i++ {
+			n++
+		}
+
+		list := make([]int, n, n)
+		for i := 0; i < n; i++ {
+			list[0] = i
+		}
+	}
+}
+
 func BenchmarkArray01(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
