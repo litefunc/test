@@ -264,7 +264,21 @@ func Benchmark02sqlxDB(b *testing.B) {
 		sqlxDB.Select(&TbAas{}, "SELECT id, embed_aa, embed_ab, note FROM tb_aa")
 	}
 }
-func Benchmark03sqlDB(b *testing.B) {
+
+func Benchmark03sqlxDB(b *testing.B) {
+	db := setupBenchData()
+	defer db.Close()
+	defer db.Truncate(mdas).Run()
+	q := db.Select(&TbAas{}).SQL()
+	sqlxDB := db.DB
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		sqlxDB.Select(&TbAas{}, q)
+	}
+}
+
+func Benchmark04sqlDB(b *testing.B) {
 	db := setupBenchData()
 	defer db.Close()
 	defer db.Truncate(mdas).Run()

@@ -156,3 +156,12 @@ func testGetSerial(md interface{}, want string) func(t *testing.T) {
 	}
 	return f
 }
+
+func Benchmark01SelectSQL(b *testing.B) {
+	var db DB
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		db.Select(&TbAas{}).SQL()
+	}
+}
