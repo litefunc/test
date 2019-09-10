@@ -242,52 +242,61 @@ func ModelEqual(want, got TbAa) error {
 
 }
 
-func Benchmark01pgsqlDB(b *testing.B) {
+func BenchmarkDB(b *testing.B) {
 	db := setupBenchData()
 	defer db.Close()
 	defer db.Truncate(mdas).Run()
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		db.Select(&TbAas{}).Run()
-	}
+	b.Run("pgsqlDB-01", benchmark01pgsqlDB(b, db))
+	b.Run("sqlxDB-01", benchmark01sqlxDB(b, db))
+	b.Run("sqlxDB-02", benchmark02sqlxDB(b, db))
+	b.Run("sqlDB-01", benchmark01sqlDB(b, db))
+
 }
 
-func Benchmark02sqlxDB(b *testing.B) {
-	db := setupBenchData()
-	defer db.Close()
-	defer db.Truncate(mdas).Run()
+func benchmark01pgsqlDB(b *testing.B, db *DB) func(b *testing.B) {
+
+	f := func(b *testing.B) {
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			db.Select(&TbAas{}).Run()
+		}
+	}
+	return f
+}
+
+func benchmark01sqlxDB(b *testing.B, db *DB) func(b *testing.B) {
 	sqlxDB := db.DB
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		sqlxDB.Select(&TbAas{}, "SELECT id, embed_aa, embed_ab, note FROM tb_aa")
+	f := func(b *testing.B) {
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			sqlxDB.Select(&TbAas{}, "SELECT id, embed_aa, embed_ab, note FROM tb_aa")
+		}
 	}
+	return f
 }
 
-func Benchmark03sqlxDB(b *testing.B) {
-	db := setupBenchData()
-	defer db.Close()
-	defer db.Truncate(mdas).Run()
+func benchmark02sqlxDB(b *testing.B, db *DB) func(b *testing.B) {
 	q := db.Select(&TbAas{}).SQL()
 	sqlxDB := db.DB
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		sqlxDB.Select(&TbAas{}, q)
+	f := func(b *testing.B) {
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			sqlxDB.Select(&TbAas{}, q)
+		}
 	}
+	return f
 }
 
-func Benchmark04sqlDB(b *testing.B) {
-	db := setupBenchData()
-	defer db.Close()
-	defer db.Truncate(mdas).Run()
+func benchmark01sqlDB(b *testing.B, db *DB) func(b *testing.B) {
 	sqlDB := db.DB.DB
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		sqlSelect(sqlDB)
+	f := func(b *testing.B) {
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			sqlSelect(sqlDB)
+		}
 	}
+	return f
 }
 
 func setupBenchData() *DB {
