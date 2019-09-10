@@ -5,15 +5,18 @@ import (
 	"net/http"
 )
 
-func connected() (ok bool) {
-	_, err := http.Get("http://clients3.google.com/generate_204")
+func connected(url string) (ok bool) {
+	resp, err := http.Get(url)
 	if err != nil {
 		logger.Error(err)
 		return false
 	}
+	logger.Debug(resp.StatusCode)
 	return true
 }
 
 func main() {
-	logger.Debug(connected())
+	logger.Debug(connected("http://clients3.google.com/generate_204"))
+	logger.Debug(connected("http://clients3.google.com/generate_404"))
+	logger.Debug(connected("http://fake"))
 }
