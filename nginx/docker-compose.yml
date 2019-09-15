@@ -1,0 +1,27 @@
+version: '3'
+services:
+  nginx:
+    image: nginx
+    depends_on:
+      - web1
+      - web2
+      - web3
+    ports:
+      - 8888:80
+    volumes:
+      - ./conf.d:/etc/nginx/conf.d
+  web1:
+    build: ./
+    environment:
+      - PORT=8080
+    command: /main.bin -p 8080 -i 1
+  web2:
+    build: ./
+    environment:
+      - PORT=8081
+    command: /main.bin -p 8081 -i 2
+  web3:
+    build: ./
+    environment:
+      - PORT=8082
+    command: /main.bin -p 8082 -i 3
