@@ -56,9 +56,15 @@ func (tx Tx) Insert(md interface{}) Exec {
 	return NewExec(tx.Tx, tx.q.Insert(GetTable(md), cols, vals...), md)
 }
 
-func (tx Tx) Select(md interface{}) Query {
+func (tx Tx) Select(md interface{}, cols ...string) Query {
 
-	q := NewQuery(tx.Tx, tx.q.Select(GetTable(md), GetCols(md)...), md)
+	var q Query
+	if len(cols) != 0 {
+		q = NewQuery(tx.Tx, tx.q.Select(GetTable(md), cols...), md)
+	} else {
+		q = NewQuery(tx.Tx, tx.q.Select(GetTable(md), GetCols(md)...), md)
+	}
+
 	return q
 }
 

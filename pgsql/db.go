@@ -68,9 +68,15 @@ func (db DB) Insert(md interface{}) Exec {
 	return NewExec(db.DB, db.q.Insert(GetTable(md), cols, vals...), md)
 }
 
-func (db DB) Select(md interface{}) Query {
+func (db DB) Select(md interface{}, cols ...string) Query {
 
-	q := NewQuery(db.DB, db.q.Select(GetTable(md), GetCols(md)...), md)
+	var q Query
+	if len(cols) != 0 {
+		q = NewQuery(db.DB, db.q.Select(GetTable(md), cols...), md)
+	} else {
+		q = NewQuery(db.DB, db.q.Select(GetTable(md), GetCols(md)...), md)
+	}
+
 	return q
 }
 

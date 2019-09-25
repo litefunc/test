@@ -212,7 +212,7 @@ func TestWhere(t *testing.T) {
 }
 
 type database interface {
-	Select(md interface{}) Query
+	Select(md interface{}, cols ...string) Query
 }
 
 func ModelsEqual(db database, want TbAas) error {
