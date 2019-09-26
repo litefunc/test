@@ -80,19 +80,24 @@ func (db DB) Select(md interface{}, cols ...string) Query {
 	return q
 }
 
-func (db DB) SelectByPk(md interface{}) Query {
+func (db DB) SelectByPk(md interface{}, cols ...string) Query {
 
 	pks := GetPks(md)
 	cvs := GetColsValues(md)
 
-	var cols []string
+	var pcols []string
 	var args []interface{}
 	for _, k := range pks {
-		cols = append(cols, fmt.Sprintf(`%s=?`, k))
+		pcols = append(pcols, fmt.Sprintf(`%s=?`, k))
 		args = append(args, cvs[k])
 	}
 
-	q := db.q.Select(GetTable(md), GetCols(md)...).Where(strings.Join(cols, " AND "), args...)
+	var q query.Query
+	if len(cols) != 0 {
+		q = db.q.Select(GetTable(md), cols...).Where(strings.Join(pcols, " AND "), args...)
+	} else {
+		q = db.q.Select(GetTable(md), GetCols(md)...).Where(strings.Join(pcols, " AND "), args...)
+	}
 
 	return NewQuery(db.DB, q, md)
 }

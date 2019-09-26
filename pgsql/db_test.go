@@ -12,7 +12,7 @@ import (
 
 func TestBasicCRUD(t *testing.T) {
 
-	dbConfig := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "localhost", 5431, "test", "abcd", "test")
+	dbConfig := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "localhost", 5433, "test", "abcd", "test")
 	db, err := Connect(dbConfig)
 	if err != nil {
 		t.Error(err)
@@ -123,7 +123,7 @@ func TestBasicCRUD(t *testing.T) {
 
 func TestWhere(t *testing.T) {
 
-	dbConfig := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "localhost", 5431, "test", "abcd", "test")
+	dbConfig := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "localhost", 5433, "test", "abcd", "test")
 	db, err := Connect(dbConfig)
 	if err != nil {
 		t.Error(err)
@@ -300,7 +300,7 @@ func benchmark01sqlDB(b *testing.B, db *DB) func(b *testing.B) {
 }
 
 func setupBenchData() *DB {
-	dbConfig := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "localhost", 5431, "test", "abcd", "test")
+	dbConfig := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "localhost", 5433, "test", "abcd", "test")
 	db, err := Connect(dbConfig)
 	if err != nil {
 		logger.Panic(err)

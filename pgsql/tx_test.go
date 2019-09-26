@@ -9,7 +9,7 @@ import (
 
 func TestTxBasicCRUD(t *testing.T) {
 
-	dbConfig := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "localhost", 5431, "test", "abcd", "test")
+	dbConfig := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "localhost", 5433, "test", "abcd", "test")
 	db, _ := Connect(dbConfig)
 	defer db.Close()
 	tx, err := db.Begin()
@@ -120,7 +120,7 @@ func TestTxBasicCRUD(t *testing.T) {
 
 func TestTxWhere(t *testing.T) {
 
-	dbConfig := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "localhost", 5431, "test", "abcd", "test")
+	dbConfig := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "localhost", 5433, "test", "abcd", "test")
 	db, _ := Connect(dbConfig)
 	defer db.Close()
 	tx, err := db.Begin()

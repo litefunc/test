@@ -5,7 +5,7 @@ services:
     volumes:
       - ./internal/table.sql:/docker-entrypoint-initdb.d/1-table.sql
     ports:
-      - "5431:5432"
+      - "5433:5432"
     environment:
       POSTGRES_DB: test
       POSTGRES_USER: test
