@@ -18,33 +18,21 @@ func TestTxBasicCRUD(t *testing.T) {
 		return
 	}
 	defer tx.Rollback()
+	test := NewTester(t)
 
 	var mdas TbAas
-	tx.Select(&mdas).SQL()
-	if err := tx.Select(&mdas).Run(); err != nil {
-		t.Error(err)
-		return
-	}
+	test.Run(tx.Select(&mdas))
+
 	// len(mdas) should be 0
 	if err := ModelsEqual(tx, mdas); err != nil {
 		t.Error(err)
 		return
 	}
-
-	if err := tx.Insert(mda1).Returning("id").Run().Scan(&mda1.ID); err != nil {
-		t.Error(err)
-		return
-	}
-	if err := tx.Insert(mda2).Returning("id").Run().Scan(&mda2.ID); err != nil {
-		t.Error(err)
-		return
-	}
+	test.Scan(tx.Insert(mda1).Returning("id").Run(), &mda1.ID)
+	test.Scan(tx.Insert(mda2).Returning("id").Run(), &mda2.ID)
 
 	md := TbAa{ID: mda1.ID}
-	if err := tx.SelectByPk(&md).Run(); err != nil {
-		t.Error(err)
-		return
-	}
+	test.Run(tx.SelectByPk(&md))
 	if err := ModelEqual(mda1, md); err != nil {
 		t.Error(err)
 		return
@@ -58,58 +46,40 @@ func TestTxBasicCRUD(t *testing.T) {
 	mda2.EmbedAa = mda2.EmbedAa * 10
 	mda2.EmbedAb = mda2.EmbedAb + mda2.EmbedAb
 	mda2.Note = mda2.Note + mda2.Note
-	if _, err := tx.UpdateByPk(mda2).Run(); err != nil {
-		t.Error(err)
-		return
-	}
-
+	test.Run(tx.UpdateByPk(mda2))
 	if err := ModelsEqual(tx, append(mdas, mda1, mda2)); err != nil {
 		t.Error(err)
 		return
 	}
 
 	var n int
-	if err := tx.Count(mdas).Run().Scan(&n); err != nil {
-		t.Error(err)
-		return
-	}
+	test.Scan(tx.Count(mdas).Run(), &n)
 	if n != 2 {
 		t.Error(n)
+		return
 	}
 
 	n = 0
-	if err := tx.CountDistinct(mdas, "note").Run().Scan(&n); err != nil {
-		t.Error(err)
-		return
-	}
+	test.Scan(tx.CountDistinct(mdas, "note").Run(), &n)
 	if n != 2 {
 		t.Error(n)
+		return
 	}
 
-	if _, err := tx.Delete(mda2).Run(); err != ErrDeleteWithoutCondition {
+	if err := tx.Delete(mda2).Run(); err != ErrDeleteWithoutCondition {
 		t.Error(err)
 		return
 	}
 
-	if _, err := tx.DeleteByPk(mda2).Run(); err != nil {
-		t.Error(err)
-		return
-	}
+	test.Run(tx.DeleteByPk(mda2))
 	if err := ModelsEqual(tx, append(mdas, mda1)); err != nil {
 		t.Error(err)
 		return
 	}
 
-	if _, err := tx.Truncate(mdas).Run(); err != nil {
-		t.Error(err)
-		return
-	}
+	test.Run(tx.Truncate(mdas))
+	test.Run(tx.Select(&mdas))
 
-	tx.Select(&mdas).SQL()
-	if err := tx.Select(&mdas).Run(); err != nil {
-		t.Error(err)
-		return
-	}
 	// len(mdas) should be 0
 	if err := ModelsEqual(tx, mdas); err != nil {
 		t.Error(err)
@@ -128,13 +98,11 @@ func TestTxWhere(t *testing.T) {
 		t.Error(err)
 		return
 	}
+	test := NewTester(t)
 
 	var mdas TbAas
-	tx.Select(&mdas).SQL()
-	if err := tx.Select(&mdas).Run(); err != nil {
-		t.Error(err)
-		return
-	}
+	test.Run(tx.Select(&mdas))
+
 	// len(mdas) should be 0
 	if err := ModelsEqual(tx, mdas); err != nil {
 		t.Error(err)
@@ -142,26 +110,15 @@ func TestTxWhere(t *testing.T) {
 	}
 
 	defer tx.Truncate(mdas).Run()
-
-	if err := tx.Insert(mda1).Returning("id").Run().Scan(&mda1.ID); err != nil {
-		t.Error(err)
-		return
-	}
-	if err := tx.Insert(mda2).Returning("id").Run().Scan(&mda2.ID); err != nil {
-		t.Error(err)
-		return
-	}
-
+	test.Scan(tx.Insert(mda1).Returning("id").Run(), &mda1.ID)
+	test.Scan(tx.Insert(mda2).Returning("id").Run(), &mda2.ID)
 	if err := ModelsEqual(tx, append(mdas, mda1, mda2)); err != nil {
 		t.Error(err)
 		return
 	}
 
 	md := TbAa{}
-	if err := tx.Select(&md).Where("note=?", mda1.Note).Run(); err != nil {
-		t.Error(err)
-		return
-	}
+	test.Run(tx.Select(&md).Where("note=?", mda1.Note))
 	if err := ModelEqual(mda1, md); err != nil {
 		t.Error(err)
 		return
@@ -169,39 +126,27 @@ func TestTxWhere(t *testing.T) {
 
 	mda2.EmbedAa = mda2.EmbedAa * 10
 	mda2.EmbedAb = mda2.EmbedAb + mda2.EmbedAb
-	if _, err := tx.Update(TbAa{}).Set("embed_aa=?, embed_ab=?", mda2.EmbedAa, mda2.EmbedAb).Where("note=?", mda2.Note).Run(); err != nil {
-		t.Error(err)
-		return
-	}
-
+	test.Run(tx.Update(TbAa{}).Set("embed_aa=?, embed_ab=?", mda2.EmbedAa, mda2.EmbedAb).Where("note=?", mda2.Note))
 	if err := ModelsEqual(tx, append(mdas, mda1, mda2)); err != nil {
 		t.Error(err)
 		return
 	}
 
 	var n int
-	if err := tx.Count(TbAa{}).Where("note=?", mda2.Note).Run().Scan(&n); err != nil {
-		t.Error(err)
-		return
-	}
+	test.Scan(tx.Count(TbAa{}).Where("note=?", mda2.Note).Run(), &n)
 	if n != 1 {
 		t.Error(n)
+		return
 	}
 
 	n = 0
-	if err := tx.CountDistinct(TbAa{}, "note").Where("note=?", mda2.Note).Run().Scan(&n); err != nil {
-		t.Error(err)
-		return
-	}
+	test.Scan(tx.CountDistinct(TbAa{}, "note").Where("note=?", mda2.Note).Run(), &n)
 	if n != 1 {
 		t.Error(n)
-	}
-
-	if _, err := tx.Delete(TbAa{}).Where("note=?", mda2.Note).Run(); err != nil {
-		t.Error(err)
 		return
 	}
 
+	test.Run(tx.Delete(TbAa{}).Where("note=?", mda2.Note))
 	if err := ModelsEqual(tx, append(mdas, mda1)); err != nil {
 		t.Error(err)
 		return

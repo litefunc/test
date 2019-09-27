@@ -22,7 +22,26 @@ func NewExec(db Database, q query.Query, md interface{}) Exec {
 
 var ErrDeleteWithoutCondition = errors.New(`pgsql: DELETE must have condition. To delete all rows, use TRUNCATE instead`)
 
-func (db Exec) Run() (sql.Result, error) {
+func (db Exec) Run() error {
+
+	// logger.Debug(db.q.SQL(), db.q.Args())
+
+	if db.q.Type() == query.DELETE {
+		if !strings.Contains(db.q.SQL(), "WHERE") {
+			return ErrDeleteWithoutCondition
+		}
+	}
+
+	_, err := db.DB.Exec(db.q.SQL(), db.q.Args()...)
+	if err != nil {
+		logger.Error(err)
+		return err
+	}
+
+	return nil
+}
+
+func (db Exec) Result() (sql.Result, error) {
 
 	// logger.Debug(db.q.SQL(), db.q.Args())
 
