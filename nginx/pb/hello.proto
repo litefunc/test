@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package pb;
+
+service Hello {
+	rpc Hello (Empty) returns (Reply) {}
+}
+
+message Reply {
+	uint64 id    = 1;
+}
+
+message Empty {}

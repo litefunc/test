@@ -6,14 +6,20 @@ import (
 	"html"
 	"log"
 	"net/http"
+	"test/nginx/grpc/hello"
+	"time"
 )
 
 func main() {
 	i := flag.Int("i", 1, "server number")
 	p := flag.Int("p", 8080, "port")
+	hp := flag.Int("hp", 50050, "grpc hello server port")
 	flag.Parse()
 
+	hello.NewServer(uint64(*i), *hp)
+
 	var n int
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		n = n + 1
 		fmt.Fprintf(w, "server: %d\n", *i)
@@ -21,6 +27,26 @@ func main() {
 		fmt.Fprintf(w, "r.URL.Host: %s\n", r.URL.Host)
 		fmt.Fprintf(w, "r.URL.Path: %q\n", html.EscapeString(r.URL.Path))
 		fmt.Fprintf(w, "visits: %d\n", n)
+	})
+
+	http.HandleFunc("/wait", func(w http.ResponseWriter, r *http.Request) {
+		n = n + 1
+		fmt.Fprintf(w, "server: %d\n", *i)
+		fmt.Fprintf(w, "r.Host: %s\n", r.Host)
+		fmt.Fprintf(w, "r.URL.Host: %s\n", r.URL.Host)
+		fmt.Fprintf(w, "r.URL.Path: %q\n", html.EscapeString(r.URL.Path))
+		fmt.Fprintf(w, "visits: %d\n", n)
+		w.Write([]byte("wait\n"))
+		go func() {
+			time.Sleep(time.Second * 4)
+			fmt.Fprintln(w, "finish 1")
+		}()
+		go func() {
+			time.Sleep(time.Second * 6)
+			fmt.Fprintln(w, "finish 2")
+		}()
+		time.Sleep(time.Second * 5)
+		fmt.Fprintln(w, "return")
 	})
 
 	fmt.Println("HTTP server listen at:", *p)

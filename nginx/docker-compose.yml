@@ -8,20 +8,27 @@ services:
       - web3
     ports:
       - 8888:80
+      - 8889:8088
     volumes:
       - ./conf.d:/etc/nginx/conf.d
   web1:
     build: ./
+    ports:
+      - 50050:50050
     environment:
       - PORT=8080
-    command: /main.bin -p 8080 -i 1
+    command: /main.bin -p 8080 -hp 50050 -i 1
   web2:
     build: ./
+    ports:
+      - 50051:50051
     environment:
       - PORT=8081
-    command: /main.bin -p 8081 -i 2
+    command: /main.bin -p 8081 -hp 50051 -i 2
   web3:
     build: ./
+    ports:
+      - 50052:50052    
     environment:
       - PORT=8082
-    command: /main.bin -p 8082 -i 3
+    command: /main.bin -p 8082 -hp 50052 -i 3
