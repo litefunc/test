@@ -37,6 +37,26 @@ func main() {
 		w.Write(by)
 	})
 
+	http.HandleFunc("/go1", func(w http.ResponseWriter, r *http.Request) {
+		client := &http.Client{}
+		req, err := http.NewRequest("GET", fmt.Sprintf("http://localhost:%d/index", *p), nil)
+		if err != nil {
+			return
+		}
+		req.Header.Add("X-Real-IP", r.RemoteAddr)
+		res, err := client.Do(req)
+		if err != nil {
+			return
+		}
+
+		by, _ := ioutil.ReadAll(res.Body)
+		w.Write(by)
+	})
+
+	http.HandleFunc("/redirect", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/index", http.StatusSeeOther)
+	})
+
 	fmt.Println("HTTP server listen at:", *p)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(`:%d`, *p), nil))
 
