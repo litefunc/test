@@ -51,7 +51,6 @@ func main() {
 	logger.Debug(string(by))
 	logger.Debug(now.String())
 
-
 	t1 := T1{Time: "2019-08-19T01:25:24.781Z"}
 	by1, _ := json.Marshal(t1)
 	logger.Debug(string(by1))
@@ -66,4 +65,7 @@ func main() {
 	by3, _ := json.Marshal(t3)
 	logger.Debug(string(by3))
 
+	diff := now.Sub(now.Add(time.Hour)).Seconds()
+	logger.Debug(diff < 0)
+	logger.Debug(uint64(diff))
 }
