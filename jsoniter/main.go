@@ -30,4 +30,16 @@ func main() {
 	val := []byte(`{"ID":1,"Name":"Reds","Colors":["Crimson","Red","Ruby","Maroon"]}`)
 	logger.Debug(string(val))
 	logger.Debug(jsoniter.Get(val, "Colors", 0).ToString())
+	m := make(map[string]interface{})
+	if err := jsoniter.Unmarshal(val, &m); err != nil {
+		logger.Error(err)
+		return
+	}
+	logger.Debug(m)
+	s, err := jsoniter.MarshalToString(m)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	logger.Debug(s)
 }

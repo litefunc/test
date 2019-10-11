@@ -18,12 +18,82 @@ func read(db *sql.DB, i int) {
 	fmt.Println(i)
 }
 
+func conn(dbConfig string, n int) {
+	for i := 0; i < n; i++ {
+		db, err := sql.Open("postgres", dbConfig)
+		if err != nil {
+			logger.Error("db connection", err)
+			return
+		}
+		logger.Debug(i, db)
+		// defer db.Close()
+
+		if err := db.Ping(); err != nil {
+			logger.Error(err)
+		}
+		logger.Debug(i, db)
+	}
+}
+
+func begin(db *sql.DB, n int) {
+	for i := 0; i < n; i++ {
+		_, err := db.Begin()
+		if err != nil {
+			logger.Error("db connection", err)
+			return
+		}
+	}
+}
+
+func maxIdleConns(db *sql.DB, idle, n int) {
+	if idle > -1 {
+		db.SetMaxIdleConns(idle)
+	}
+
+	for i := 0; i < n; i++ {
+		tx, err := db.Begin()
+		if err != nil {
+			logger.Error("db connection", err)
+			return
+		}
+		defer tx.Rollback()
+	}
+}
+
+func copy(db *sql.DB, n int) {
+	logger.Debugf(`%p`, db)
+	for i := 0; i < n; i++ {
+		db1 := &*db
+		logger.Debugf(`%p`, db1)
+		if err := db1.Ping(); err != nil {
+			logger.Error(err)
+		}
+	}
+}
+
+func copyv(db *sql.DB, n int) {
+	logger.Debugf(`%p`, db)
+	for i := 0; i < n; i++ {
+		db1 := *db
+		if err := db1.Ping(); err != nil {
+			logger.Error(err)
+		}
+		_, err := db1.Begin()
+		if err != nil {
+			logger.Error("db connection", err)
+			return
+		}
+	}
+}
+
 func main() {
 
 	config.ParseConfig(os.Getenv("GOPATH")+"/src/cloud/server/ota/config/config.local.json", &config.Config)
 	cfg := &config.Config
 
 	dbConfig := config.GetPgsqlConfig(cfg.DB)
+
+	// conn(dbConfig, 5)
 
 	db, err := sql.Open("postgres", dbConfig)
 	if err != nil {
@@ -32,62 +102,14 @@ func main() {
 	}
 	defer db.Close()
 
-	db.SetMaxIdleConns(10)
+	// begin(db, 5)
+	// maxIdleConns(db, 5, 10)
+	copyv(db, 10)
 
-	if err := db.Ping(); err != nil {
-		logger.Error(err)
-	}
-	if err := db.Ping(); err != nil {
-		logger.Error(err)
-	}
-	db1 := db
-	if err := db1.Ping(); err != nil {
-		logger.Error(err)
-	}
-
-	db2 := *db
-	if err := db2.Ping(); err != nil {
-		logger.Error(err)
-	}
-
-	db3 := *db
-	if err := db3.Ping(); err != nil {
-		logger.Error(err)
-	}
-
-	tx, err := db.Begin()
-	if err != nil {
-		logger.Error(err)
-	}
-	defer tx.Commit()
-
-	tx1, err := db1.Begin()
-	if err != nil {
-		logger.Error(err)
-	}
-	defer tx1.Commit()
-
-	tx2, err := db2.Begin()
-	if err != nil {
-		logger.Error(err)
-	}
-	defer tx2.Commit()
-
-	tx3, err := db3.Begin()
-	if err != nil {
-		logger.Error(err)
-	}
-	defer tx3.Commit()
-
-	tx.Commit()
-	tx1.Commit()
-	tx2.Commit()
-	tx3.Commit()
-
-	read(db, 0)
-	read(db1, 1)
-	read(&db2, 2)
-	read(&db3, 3)
+	// read(db, 0)
+	// read(db1, 1)
+	// read(&db2, 2)
+	// read(&db3, 3)
 
 	var wc chan int
 	<-wc
