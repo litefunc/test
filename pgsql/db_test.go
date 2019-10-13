@@ -41,6 +41,13 @@ func TestBasicCRUD(t *testing.T) {
 		return
 	}
 
+	md = TbAa{ID: mda1.ID}
+	test.Run(db.SelectByPk(&md, "embed_aa", "embed_ab"))
+	if err := ModelEqual(TbAa{ID: mda1.ID, Embed: Embed{EmbedAa: 1, EmbedAb: "b1"}, Note: ""}, md); err != nil {
+		t.Error(err)
+		return
+	}
+
 	if err := ModelsEqual(db, append(mdas, mda1, mda2)); err != nil {
 		t.Error(err)
 		return
