@@ -1,28 +1,32 @@
 package main
 
 import (
-	"bytes"
 	"cloud/lib/logger"
 )
 
-func p() {
-	panic(1)
+func by(s string) []byte {
+	return []byte(s)
 }
 
-func r() {
-	defer func() {
-		if r := recover(); r != nil {
-			logger.Debug("Recovered in f", r)
-		}
-	}()
+func st(is ...uint8) string {
+	var b []byte
+	// for _, v := range is {
+	// 	b = append(b, v)
+	// }
+	return string(append(b, is...))
+}
 
-	p()
+func ascii() {
+	for i := 0; i < 128; i++ {
+		logger.Debug(i, st(uint8(i)))
+	}
 }
 
 func main() {
 
-	r()
-	var loadBuf bytes.Buffer
+	ascii()
 
-	logger.Debug(loadBuf.String())
+	logger.Debug(by("\n"))
+	logger.Debug(by("\t"))
+
 }
