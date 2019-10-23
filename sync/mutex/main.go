@@ -1,8 +1,10 @@
 package main
 
 import (
+	"cloud/lib/logger"
 	"fmt"
 	"sync"
+	"time"
 )
 
 var m sync.RWMutex
@@ -31,6 +33,24 @@ func wr() {
 }
 
 func main() {
-	rr()
+	// rr()
+	mutex(1)
+	mutex(2)
+	mutex(3)
 	fmt.Println("finish")
+	var wc chan int
+	<-wc
+}
+
+func mutex(n int) {
+	var mu sync.Mutex
+	for i := 0; i < 10; i++ {
+		go func(i int) {
+			mu.Lock()
+			defer mu.Unlock()
+			logger.Debug(n)
+			time.Sleep(time.Second)
+
+		}(i)
+	}
 }
