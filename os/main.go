@@ -27,4 +27,13 @@ func main() {
 	}
 	defer f.Close()
 
+	stat(path, "/usr/", "usr/abc")
+}
+
+func stat(path ...string) {
+	for _, p := range path {
+		if _, err := os.Stat(p); err != nil {
+			logger.Error(err)
+		}
+	}
 }

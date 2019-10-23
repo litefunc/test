@@ -3,6 +3,7 @@ package main
 import (
 	"cloud/lib/logger"
 	"encoding/json"
+	"strings"
 )
 
 func main() {
@@ -23,4 +24,14 @@ func main() {
 	}
 
 	logger.Debug(b)
+
+	s = strings.Replace(" abc  def gh", "  ", " ", -1)
+	logger.Debug(s)
+	s = strings.Replace(" abc   def gh", "  ", " ", -1)
+	logger.Debug(s)
+
+	ss := strings.Split(" abc   def gh", " ")
+	for i, s := range ss {
+		logger.Debug(i, len(s), s)
+	}
 }
