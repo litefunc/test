@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cloud/lib/logger"
 	"flag"
 	"fmt"
 	"html"
@@ -8,7 +9,27 @@ import (
 	"log"
 	"net/http"
 	"sort"
+	"sync"
+	"time"
 )
+
+type hd struct {
+	i  int
+	mu sync.Mutex
+}
+
+func (h *hd) Get(w http.ResponseWriter, r *http.Request) {
+	h.mu.Lock()
+	logger.Debug(h.i)
+	h.i = h.i + 1
+	h.mu.Unlock()
+	time.Sleep(time.Second)
+	h.Sleep()
+}
+
+func (h *hd) Sleep() {
+	time.Sleep(time.Second)
+}
 
 func main() {
 
@@ -55,6 +76,19 @@ func main() {
 
 	http.HandleFunc("/redirect", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/index", http.StatusSeeOther)
+	})
+
+	var h hd
+	http.HandleFunc("/sleep", h.Get)
+
+	var mu sync.Mutex
+	var s int
+	http.HandleFunc("/sleep1", func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
+		logger.Debug(s)
+		s++
+		mu.Unlock()
+		time.Sleep(time.Second)
 	})
 
 	fmt.Println("HTTP server listen at:", *p)
