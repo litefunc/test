@@ -32,4 +32,10 @@ func main() {
 	by, err = json.Marshal(p)
 	logger.Debugf(`%s`, by)
 	logger.Error(err)
+
+	by, err = json.Marshal(`{123`)
+	if err != nil {
+		logger.Error(err)
+	}
+	logger.Debugf(string(by))
 }

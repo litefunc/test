@@ -1,0 +1,16 @@
+{
+    "subtitles": [
+        {
+            "file": "test.el.vtt",
+            "label": "Ελληνικά Υπότιτλος",
+            "srclang": "el",
+            "default": false
+        },
+        {
+            "file": "test.en.vtt",
+            "label": "English Subtitles",
+            "srclang": "en",
+            "default": true
+        }
+    ]
+}

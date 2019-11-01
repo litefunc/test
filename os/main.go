@@ -4,6 +4,7 @@ import (
 	"cloud/lib/logger"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func main() {
@@ -27,7 +28,10 @@ func main() {
 	}
 	defer f.Close()
 
-	stat(path, "/usr/", "usr/abc")
+	stat(path, "/usr/", "usr/abc", "Behind%20My%20Life/Behind%20My%20Life.jpg")
+	p := os.Getenv("GOPATH") + "/src/test/os/" + "Behind%20My%20Life/Behind%20My%20Life.jpg"
+	stat(p)
+	stat(strings.Replace(p, "%20", " ", -1))
 }
 
 func stat(path ...string) {

@@ -1,0 +1,78 @@
+{"content": {
+    "editorID": "Msat Global",
+    "catalog": "Msat Global_AVAILABLE",
+    "userDefined": {"EmbeddedContent": {
+        "Extension": "",
+        "Allocation": {"Genre": "AFRICAN MOVIES"},
+        "Metadata": {
+            "BroadcastDate": "2017-06-01T11:00:00Z",
+            "LicensingWindowEnd": "2022-11-02T16:00:00Z",
+            "DirectorsDisplay": "Matthieu Chapet",
+            "CountryOfOrigin": "AFRICA",
+            "Title": "She was my best friend",
+            "SortKey": "_CUTV, Adventure",
+            "SummaryShort": "She was my best friend",
+            "SummaryLong": "She was my best friend",
+            "LicensingWindowStart": "2015-11-03T16:00:00Z",
+            "Runtime": "00:08:22:22",
+            "ChannelName": "Vodvs34",
+            "DisplayRuntime": "00:08",
+            "Revision": 1,
+            "Year": 2015,
+            "Language": "eng",
+            "OriginalTitle": "She was my best friend",
+            "ParentalRating": 6,
+            "BroadcastEndDate": "2017-06-01T11:08:22Z",
+            "MovieCopyProtection": 0,
+            "Resolution": "HD"
+        },
+        "Product": {"SVOD": {
+            "AvailabilityWindowStart": "2018-10-24T04:00:00Z",
+            "ProductName": "SVOD",
+            "AvailabilityWindowEnd": "2018-11-02T15:00:00Z"
+        }}
+    }},
+    "description": {
+        "videoVersion": "HD",
+        "productionDate": 2015,
+        "shortSummary": "Behind My Life",
+        "series": false,
+        "directors": {"director": ["Matthieu Chapet"]},
+        "theoricDuration": "PT00H08M22S",
+        "longSummary": "Behind My Life",
+        "shortTitle": "Behind My Life",
+        "productionNationality": "SA",
+        "category": "FAITH LIFE"
+    },
+    "videos": {"movie": {
+        "duration": "PT00H08M22S",
+        "file": {
+            "filename": "Behind My Life 3.mp4",
+            "filesize": 179496183
+        }
+    }},
+    "version": 4.5,
+    "VODInfo": {
+        "validityStartDate": "2018-10-24T06:00:00+01:00",
+        "movieID": "OVPD0000000000017600",
+        "validityEndDate": "2018-11-02T16:00:00+01:00",
+        "revision": 1
+    },
+    "pictures": {
+        "cover": {
+            "file": {
+                "filename": "SWMBF.jpg",
+                "filesize": 113658
+            },
+            "resolution": "1920x1080"
+        },
+        "thumbnail": {
+            "file": {
+                "filename": "Behind My Life.jpg",
+                "filesize": 7132
+            },
+            "resolution": "250x150"
+        }
+    },
+    "pushInfo": {"CID": 1113}
+}}
