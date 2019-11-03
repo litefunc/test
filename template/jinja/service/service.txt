@@ -1,0 +1,60 @@
+package {{package}}
+
+import (
+    {{import}}
+)
+
+type Service struct {
+    DB DB
+}
+
+type DB interface {
+    Begin() (Tx, error)
+    {% for md in models -%}
+    {{md.Model}}Store
+    {% endfor -%}
+    {{more}}
+}
+
+type Tx interface {
+    Commit() error
+    Rollback() error
+    {% for md in models -%}
+    {{md.Model}}Store
+    {% endfor -%}
+    {{more}}
+}
+
+{% for md in models %}
+
+    {{md.def}}
+
+    type {{md.Models}} []{{md.Model}}
+
+    {{md.new}}
+
+    {% if md.serial %}
+
+    type {{md.Model}}Store interface {
+        Insert{{md.Model}}({{md.Model}}) (uint64, error)
+        Get{{md.Models}}(condition map[string]interface{}, cols ...string) ({{md.Models}}, error)
+        GetOne{{md.Model}}(condition map[string]interface{}, cols ...string) ({{md.Model}}, error)
+        Update{{md.Model}}(set, condition map[string]interface{}) error
+        Delete{{md.Model}}(condition map[string]interface{}) error
+        Count{{md.Model}}(condition map[string]interface{}) (uint64, error)
+    }
+
+    {% else %}
+
+    type {{md.Model}}Store interface {
+        Insert{{md.Model}}({{md.Model}}) error
+        Get{{md.Models}}(condition map[string]interface{}, cols ...string) ({{md.Models}}, error)
+        GetOne{{md.Model}}(condition map[string]interface{}, cols ...string) ({{md.Model}}, error)
+        Update{{md.Model}}(set, condition map[string]interface{}) error
+        Delete{{md.Model}}(condition map[string]interface{}) error
+        Count{{md.Model}}(condition map[string]interface{}) (uint64, error)
+    }
+
+    {% endif %}
+
+{% endfor %}
