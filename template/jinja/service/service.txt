@@ -6,14 +6,16 @@ import (
 
 type Service struct {
     DB DB
+    {{service}}
 }
 
 type DB interface {
     Begin() (Tx, error)
+    BeginTx(context.Context) (Tx, error)
     {% for md in models -%}
     {{md.Model}}Store
     {% endfor -%}
-    {{more}}
+    {{method}}
 }
 
 type Tx interface {
@@ -22,7 +24,7 @@ type Tx interface {
     {% for md in models -%}
     {{md.Model}}Store
     {% endfor -%}
-    {{more}}
+    {{method}}
 }
 
 {% for md in models %}
@@ -57,4 +59,8 @@ type Tx interface {
 
     {% endif %}
 
+{% endfor %}
+
+{% for md in interfaces %}
+    {{md}}
 {% endfor %}
