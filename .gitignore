@@ -3,5 +3,5 @@ models
 noovo
 
 template/out
-
+template/*/out
 *.bin
