@@ -3,6 +3,7 @@ package pgsql
 import (
 	"cloud/lib/logger"
 	"database/sql"
+	"errors"
 	"fmt"
 	"testing"
 
@@ -30,7 +31,8 @@ func TestBasicCRUD(t *testing.T) {
 	}
 
 	defer db.Truncate(mdas).Run()
-
+	mda1 := NewTbAa(1, "b1", "n1")
+	mda2 := NewTbAa(2, "b2", "n2")
 	test.Scan(db.Insert(mda1).Returning("id").Run(), &mda1.ID)
 	test.Scan(db.Insert(mda2).Returning("id").Run(), &mda2.ID)
 
@@ -44,6 +46,14 @@ func TestBasicCRUD(t *testing.T) {
 	md = TbAa{ID: mda1.ID}
 	test.Run(db.SelectByPk(&md, "embed_aa", "embed_ab"))
 	if err := ModelEqual(TbAa{ID: mda1.ID, Embed: Embed{EmbedAa: 1, EmbedAb: "b1"}, Note: ""}, md); err != nil {
+		t.Error(err)
+		return
+	}
+
+	// column order dosen't matter
+	md = TbAa{}
+	test.Run(db.Select(&md, "note", "embed_ab", "embed_aa").Where("id=?", mda1.ID))
+	if err := ModelEqual(TbAa{Embed: Embed{EmbedAa: 1, EmbedAb: "b1"}, Note: "n1"}, md); err != nil {
 		t.Error(err)
 		return
 	}
@@ -119,7 +129,8 @@ func TestWhere(t *testing.T) {
 	}
 
 	defer db.Truncate(mdas).Run()
-
+	mda1 := NewTbAa(1, "b1", "n1")
+	mda2 := NewTbAa(2, "b2", "n2")
 	test.Scan(db.Insert(mda1).Returning("id").Run(), &mda1.ID)
 	test.Scan(db.Insert(mda2).Returning("id").Run(), &mda2.ID)
 	if err := ModelsEqual(db, append(mdas, mda1, mda2)); err != nil {
@@ -186,7 +197,8 @@ func TestWhereIn(t *testing.T) {
 	}
 
 	defer db.Truncate(mdas).Run()
-
+	mda1 := NewTbAa(1, "b1", "n1")
+	mda2 := NewTbAa(2, "b2", "n2")
 	test.Scan(db.Insert(mda1).Returning("id").Run(), &mda1.ID)
 	test.Scan(db.Insert(mda2).Returning("id").Run(), &mda2.ID)
 	if err := ModelsEqual(db, append(mdas, mda1, mda2)); err != nil {
@@ -220,6 +232,67 @@ func TestWhereIn(t *testing.T) {
 		return
 	}
 
+}
+
+func TestJoin(t *testing.T) {
+
+	dbConfig := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "localhost", 5433, "test", "abcd", "test")
+	db, err := Connect(dbConfig)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer db.Close()
+
+	test := NewTester(t)
+
+	var mdas TbAas
+	test.Run(db.Select(&mdas))
+
+	// len(mdas) should be 0
+	if err := ModelsEqual(db, mdas); err != nil {
+		t.Error(err)
+		return
+	}
+
+	defer db.Truncate(mdas).Run()
+	mda1 := NewTbAa(1, "b1", "n1")
+	mda2 := NewTbAa(2, "b2", "n2")
+	test.Scan(db.Insert(mda1).Returning("id").Run(), &mda1.ID)
+	test.Scan(db.Insert(mda2).Returning("id").Run(), &mda2.ID)
+
+	q := `SELECT a.note, a.embed_ab, a.embed_aa, a.id FROM test.tb_aa AS a JOIN test.tb_aa AS b ON a.id=b.id`
+
+	mds := TbAas{}
+	if err := db.DB.Select(&mds, q); err != nil {
+		t.Error(err)
+		return
+	}
+	if err := ModelEqual(append(TbAas{}, mda1, mda2), mds); err != nil {
+		t.Error(err)
+		return
+	}
+
+	mds1 := TbAcs{}
+	if err := db.DB.Select(&mds1, q); err != nil {
+		t.Error(err)
+		return
+	}
+
+	mdc1 := NewTbAc(mda1.EmbedAa, mda1.EmbedAb, mda1.Note)
+	mdc1.A = mda1.ID
+	mdc2 := NewTbAc(mda2.EmbedAa, mda2.EmbedAb, mda2.Note)
+	mdc2.A = mda2.ID
+	if err := ModelEqual(append(TbAcs{}, mdc1, mdc2), mds1); err != nil {
+		t.Error(err)
+		return
+	}
+
+	mds2 := Tbs{}
+	if err := db.DB.Select(&mds2, q); err == errors.New("missing destination name note in *pgsql.Tbs") {
+		t.Error(err)
+		return
+	}
 }
 
 type database interface {

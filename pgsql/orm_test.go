@@ -39,6 +39,15 @@ type Embed struct {
 	EmbedAb string `json:"embed_ab"`
 }
 
+type TbAc struct {
+	A int64  `json:"id" db:"id"`
+	B int    `json:"embed_aa" db:"embed_aa"`
+	C string `json:"embed_ab" db:"embed_ab"`
+	D string `json:"note" db:"note"`
+}
+
+type TbAcs []TbAc
+
 func NewTb(b int, c, d string) Tb {
 
 	return Tb{
@@ -68,6 +77,15 @@ func NewTbAb(pka int, pkb string, a int, b, note string) TbAb {
 	}
 }
 
+func NewTbAc(b int, c, d string) TbAc {
+
+	return TbAc{
+		B: b,
+		C: c,
+		D: d,
+	}
+}
+
 var (
 	mda1 = NewTbAa(1, "b1", "n1")
 	mda2 = NewTbAa(2, "b2", "n2")
@@ -80,6 +98,10 @@ var (
 	mdb1 = NewTbAb(1, "pkb1", 1, "b1", "n1")
 	mdb2 = NewTbAb(2, "pkb2", 2, "b2", "n2")
 	mdbs = TbAbs{mdb1, mdb2}
+
+	mdc1 = NewTbAc(1, "b1", "n1")
+	mdc2 = NewTbAc(2, "b2", "n2")
+	mdcs = TbAcs{mdc1, mdc2}
 )
 
 func TestGetTableInfo(t *testing.T) {
