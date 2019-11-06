@@ -4,13 +4,17 @@ import (
 	"fmt"
 	"testing"
 
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 )
 
 func TestTxBasicCRUD(t *testing.T) {
 
 	dbConfig := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "localhost", 5433, "test", "abcd", "test")
-	db, _ := Connect(dbConfig)
+	db, err := Connect(dbConfig)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	defer db.Close()
 	tx, err := db.Begin()
 	if err != nil {
@@ -98,13 +102,18 @@ func TestTxBasicCRUD(t *testing.T) {
 func TestTxWhere(t *testing.T) {
 
 	dbConfig := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "localhost", 5433, "test", "abcd", "test")
-	db, _ := Connect(dbConfig)
+	db, err := Connect(dbConfig)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	defer db.Close()
 	tx, err := db.Begin()
 	if err != nil {
 		t.Error(err)
 		return
 	}
+	defer tx.Rollback()
 	test := NewTester(t)
 
 	var mdas TbAas
@@ -155,6 +164,68 @@ func TestTxWhere(t *testing.T) {
 
 	test.Run(tx.Delete(TbAa{}).Where("note=?", mda2.Note))
 	if err := ModelsEqual(tx, append(mdas, mda1)); err != nil {
+		t.Error(err)
+		return
+	}
+
+}
+
+func TestTxWhereIn(t *testing.T) {
+
+	dbConfig := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "localhost", 5433, "test", "abcd", "test")
+	db, err := Connect(dbConfig)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer db.Close()
+	tx, err := db.Begin()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer tx.Rollback()
+	test := NewTester(t)
+
+	var mdas TbAas
+	test.Run(tx.Select(&mdas))
+
+	// len(mdas) should be 0
+	if err := ModelsEqual(tx, mdas); err != nil {
+		t.Error(err)
+		return
+	}
+
+	defer tx.Truncate(mdas).Run()
+	test.Scan(tx.Insert(mda1).Returning("id").Run(), &mda1.ID)
+	test.Scan(tx.Insert(mda2).Returning("id").Run(), &mda2.ID)
+	if err := ModelsEqual(tx, append(mdas, mda1, mda2)); err != nil {
+		t.Error(err)
+		return
+	}
+
+	mds := TbAas{}
+	test.Run(tx.Select(&mds).Where("note IN (?)", pq.Array([]string{mda1.Note, mda2.Note})))
+	if err := ModelEqual(TbAas{mda1, mda2}, mds); err != nil {
+		t.Error(err)
+		return
+	}
+	mds = TbAas{}
+	test.Run(tx.Select(&mds).Where("note IN (?)", pq.Array([]string{mda2.Note})))
+	if err := ModelEqual(TbAas{mda2}, mds); err != nil {
+		t.Error(err)
+		return
+	}
+
+	mds = TbAas{}
+	test.Run(tx.Select(&mds).Where("note").In(pq.Array([]string{mda1.Note, mda2.Note})))
+	if err := ModelEqual(TbAas{mda1, mda2}, mds); err != nil {
+		t.Error(err)
+		return
+	}
+	mds = TbAas{}
+	test.Run(tx.Select(&mds).Where("note").In(pq.Array([]string{mda2.Note})))
+	if err := ModelEqual(TbAas{mda2}, mds); err != nil {
 		t.Error(err)
 		return
 	}

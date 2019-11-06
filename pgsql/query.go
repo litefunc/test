@@ -71,6 +71,11 @@ func (db Query) Where(condition string, args ...interface{}) Query {
 	return db
 }
 
+func (db Query) In(arg interface{}) Query {
+	db.q = db.q.In(arg)
+	return db
+}
+
 func (db Query) GroupBy(cols ...string) Query {
 	db.q = db.q.GroupBy(cols...)
 	return db

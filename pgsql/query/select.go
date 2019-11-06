@@ -29,6 +29,12 @@ func (q Query) Where(condition string, args ...interface{}) Query {
 	return q
 }
 
+func (q Query) In(arg interface{}) Query {
+	q.sql = append(q.sql, "IN (?) ")
+	q.args = append(q.args, arg)
+	return q
+}
+
 func (q Query) GroupBy(cols ...string) Query {
 	q.sql = append(q.sql, "GROUP BY", strings.Join(cols, ", "))
 	return q

@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 )
 
 func TestBasicCRUD(t *testing.T) {
@@ -164,6 +164,64 @@ func TestWhere(t *testing.T) {
 
 }
 
+func TestWhereIn(t *testing.T) {
+
+	dbConfig := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "localhost", 5433, "test", "abcd", "test")
+	db, err := Connect(dbConfig)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer db.Close()
+
+	test := NewTester(t)
+
+	var mdas TbAas
+	test.Run(db.Select(&mdas))
+
+	// len(mdas) should be 0
+	if err := ModelsEqual(db, mdas); err != nil {
+		t.Error(err)
+		return
+	}
+
+	defer db.Truncate(mdas).Run()
+
+	test.Scan(db.Insert(mda1).Returning("id").Run(), &mda1.ID)
+	test.Scan(db.Insert(mda2).Returning("id").Run(), &mda2.ID)
+	if err := ModelsEqual(db, append(mdas, mda1, mda2)); err != nil {
+		t.Error(err)
+		return
+	}
+
+	mds := TbAas{}
+	test.Run(db.Select(&mds).Where("note IN (?)", pq.Array([]string{mda1.Note, mda2.Note})))
+	if err := ModelEqual(TbAas{mda1, mda2}, mds); err != nil {
+		t.Error(err)
+		return
+	}
+	mds = TbAas{}
+	test.Run(db.Select(&mds).Where("note IN (?)", pq.Array([]string{mda2.Note})))
+	if err := ModelEqual(TbAas{mda2}, mds); err != nil {
+		t.Error(err)
+		return
+	}
+
+	mds = TbAas{}
+	test.Run(db.Select(&mds).Where("note").In(pq.Array([]string{mda1.Note, mda2.Note})))
+	if err := ModelEqual(TbAas{mda1, mda2}, mds); err != nil {
+		t.Error(err)
+		return
+	}
+	mds = TbAas{}
+	test.Run(db.Select(&mds).Where("note").In(pq.Array([]string{mda2.Note})))
+	if err := ModelEqual(TbAas{mda2}, mds); err != nil {
+		t.Error(err)
+		return
+	}
+
+}
+
 type database interface {
 	Select(md interface{}, cols ...string) Query
 }
@@ -186,7 +244,7 @@ func ModelsEqual(db database, want TbAas) error {
 
 }
 
-func ModelEqual(want, got TbAa) error {
+func ModelEqual(want, got interface{}) error {
 
 	if !cmp.Equal(want, got) {
 		return fmt.Errorf("\nwant:%+v,\ngot :%+v", want, got)
