@@ -5,3 +5,4 @@ noovo
 template/out
 template/*/out
 *.bin
+.*.sh
