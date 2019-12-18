@@ -1,7 +1,8 @@
 package main
 
 import (
-	"VodoPlay/logger"
+	"cloud/lib/logger"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -11,7 +12,10 @@ func connected(url string) (ok bool) {
 		logger.Error(err)
 		return false
 	}
-	logger.Debug(resp.StatusCode, http.StatusText(resp.StatusCode))
+	logger.Debug(url, resp.StatusCode, http.StatusText(resp.StatusCode), resp.Body)
+	defer resp.Body.Close()
+	by, _ := ioutil.ReadAll(resp.Body)
+	logger.Debug(string(by))
 	return true
 }
 

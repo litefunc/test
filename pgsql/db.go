@@ -2,6 +2,8 @@ package pgsql
 
 import (
 	"cloud/lib/logger"
+	"context"
+	"database/sql"
 	"fmt"
 	"strings"
 	"test/pgsql/query"
@@ -31,6 +33,14 @@ func NewDB(db *sqlx.DB) *DB {
 	return &DB{DB: db}
 }
 
+func (db DB) SqlxDB() *sqlx.DB {
+	return db.DB
+}
+
+func (db DB) SqlDB() *sql.DB {
+	return db.DB.DB
+}
+
 func (db DB) Close() error {
 	if err := db.DB.Close(); err != nil {
 		logger.Error(err)
@@ -43,6 +53,14 @@ func (db DB) Begin() (*Tx, error) {
 	tx, err := db.DB.Beginx()
 	if err != nil {
 		logger.Error(err)
+		return nil, err
+	}
+	return NewTx(tx), nil
+}
+
+func (db *DB) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) {
+	tx, err := db.DB.BeginTxx(ctx, opts)
+	if err != nil {
 		return nil, err
 	}
 	return NewTx(tx), nil

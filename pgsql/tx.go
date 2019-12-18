@@ -2,6 +2,7 @@ package pgsql
 
 import (
 	"cloud/lib/logger"
+	"database/sql"
 	"fmt"
 	"strings"
 	"test/pgsql/query"
@@ -18,6 +19,14 @@ type Tx struct {
 
 func NewTx(tx *sqlx.Tx) *Tx {
 	return &Tx{Tx: tx}
+}
+
+func (tx Tx) SqlxTx() *sqlx.Tx {
+	return tx.Tx
+}
+
+func (tx Tx) SqlTx() *sql.Tx {
+	return tx.Tx.Tx
 }
 
 func (tx Tx) Commit() error {

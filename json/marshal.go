@@ -6,6 +6,12 @@ import (
 	"math"
 )
 
+type A struct {
+	A []int
+	B []int `json:",nilasempty"`
+	C []int
+}
+
 func main() {
 	var n interface{}
 	var err error
@@ -38,4 +44,22 @@ func main() {
 		logger.Error(err)
 	}
 	logger.Debugf(string(by))
+
+	var i A
+	i.C = make([]int, 0)
+	by, _ = json.Marshal(i)
+	logger.Debug(string(by))
+
+	by, _ = json.Marshal(make([]int, 0))
+	logger.Debug(string(by))
+
+	type TestObject struct {
+		Field1 string
+		Field2 json.RawMessage
+	}
+	var data TestObject
+	json.Unmarshal([]byte(`{"field1": "hello", "field2": [1,2,3]}`), &data)
+	logger.Debug(data)
+	by, _ = json.Marshal(data)
+	logger.Debug(string(by))
 }

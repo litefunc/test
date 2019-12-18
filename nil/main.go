@@ -1,11 +1,16 @@
 package main
 
 import (
+	"VodoPlay/logger"
 	"fmt"
 	"time"
 )
 
 var in interface{}
+
+type A struct {
+	A int
+}
 
 func get() int {
 	time.Sleep(time.Second * 2)
@@ -23,5 +28,14 @@ func main() {
 			time.Sleep(time.Second)
 		}
 	}()
+
+	var i []int
+
+	i = nil
+	logger.Debug(len(i))
+
+	var a *A
+	logger.Debug(*a)
+
 	time.Sleep(time.Second * 5)
 }

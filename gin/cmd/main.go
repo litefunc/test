@@ -38,6 +38,7 @@ func main() {
 	r.GET("/get", h.GetN)
 	r.GET("/get1", h.GetN)
 	r.GET("/add", h.AddN)
+	r.GET("/add/more", h.AddN)
 
 	h1 := &handler{}
 	r.GET("/get/p", h1.GetN)

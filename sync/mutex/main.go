@@ -32,14 +32,24 @@ func wr() {
 	m.RUnlock()
 }
 
+func lock() {
+	var mu1, mu2 sync.Mutex
+	mu1.Lock()
+	mu2.Lock()
+	mu1.Unlock()
+	mu2.Unlock()
+}
+
 func main() {
-	// rr()
+	lock()
+	rr()
 	mutex(1)
 	mutex(2)
 	mutex(3)
 	fmt.Println("finish")
 	var wc chan int
 	<-wc
+
 }
 
 func mutex(n int) {

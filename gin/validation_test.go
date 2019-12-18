@@ -15,14 +15,17 @@ import (
 )
 
 type va struct {
-	A string `form:"a" json:"a"  binding:"required"`
-	B string `form:"b" json:"b" `
+	A string `form:"a" json:"a" binding:"required"`
+	B string `form:"b" json:"b" binding:"required"`
+	C string `form:"c" json:"c" `
 }
 
 func (md va) m(exclude ...string) map[string]interface{} {
 	m := map[string]interface{}{
 		"a": md.A,
 		"b": md.B,
+		"c": md.C,
+		"d": "d",
 	}
 	for _, k := range exclude {
 		delete(m, k)
@@ -32,6 +35,16 @@ func (md va) m(exclude ...string) map[string]interface{} {
 
 func setupRouter() *gin.Engine {
 	router := gin.Default()
+
+	router.GET("/query", func(c *gin.Context) {
+		var q va
+		if err := c.ShouldBind(&q); err != nil {
+			c.JSON(http.StatusOK, err.Error())
+			return
+		}
+
+		c.JSON(http.StatusOK, q)
+	})
 
 	router.POST("/json", func(c *gin.Context) {
 		var json va
@@ -57,7 +70,7 @@ func setupRouter() *gin.Engine {
 	return router
 }
 
-func TestValidation(t *testing.T) {
+func TestQueryString(t *testing.T) {
 
 	router := setupRouter()
 
@@ -65,9 +78,31 @@ func TestValidation(t *testing.T) {
 		in   map[string]interface{}
 		want interface{}
 	}{
-		{va{"a", "b"}.m(), va{"a", "b"}.m()},
-		{va{"a", ""}.m(), va{"a", ""}.m()},
-		{va{"", "b"}.m(), "Key: 'va.A' Error:Field validation for 'A' failed on the 'required' tag"},
+		{va{"a", "b", "c"}.m(), va{"a", "b", "c"}},
+		{va{"a", "b", ""}.m(), va{"a", "b", ""}},
+		{va{"", "", ""}.m(), "Key: 'va.A' Error:Field validation for 'A' failed on the 'required' tag\nKey: 'va.B' Error:Field validation for 'B' failed on the 'required' tag"},
+	} {
+		w := httptest.NewRecorder()
+		url := fmt.Sprintf(`/query?a=%s&b=%s&c=%s`, v.in["a"], v.in["b"], v.in["c"])
+		req := request.Get(t, url, nil)
+		router.ServeHTTP(w, req)
+		if err := equal(w, v.want); err != nil {
+			t.Error(err)
+		}
+	}
+}
+
+func TestPostValidation(t *testing.T) {
+
+	router := setupRouter()
+
+	for _, v := range []struct {
+		in   map[string]interface{}
+		want interface{}
+	}{
+		{va{"a", "b", "c"}.m(), va{"a", "b", "c"}},
+		{va{"a", "b", ""}.m(), va{"a", "b", ""}},
+		{va{"", "", ""}.m(), "Key: 'va.A' Error:Field validation for 'A' failed on the 'required' tag\nKey: 'va.B' Error:Field validation for 'B' failed on the 'required' tag"},
 	} {
 		w := httptest.NewRecorder()
 		req := request.Post(t, "/json", nil, v.in)
