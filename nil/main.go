@@ -23,5 +23,9 @@ func main() {
 			time.Sleep(time.Second)
 		}
 	}()
-	time.Sleep(time.Second * 5)
+	// time.Sleep(time.Second * 5)
+
+	var by []byte
+	by = nil
+	fmt.Println(len(by))
 }
