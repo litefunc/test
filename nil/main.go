@@ -1,7 +1,6 @@
 package main
 
 import (
-	"VodoPlay/logger"
 	"fmt"
 	"time"
 )
@@ -29,13 +28,10 @@ func main() {
 		}
 	}()
 
-	var i []int
+	// time.Sleep(time.Second * 5)
 
-	i = nil
-	logger.Debug(len(i))
+	var by []byte
+	by = nil
+	fmt.Println(len(by))
 
-	var a *A
-	logger.Debug(*a)
-
-	time.Sleep(time.Second * 5)
 }
