@@ -91,6 +91,11 @@ func main() {
 		time.Sleep(time.Second)
 	})
 
+	http.HandleFunc("/sleep100", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("sleep 100"))
+		time.Sleep(time.Second * 100)
+	})
+
 	fmt.Println("HTTP server listen at:", *p)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(`:%d`, *p), nil))
 

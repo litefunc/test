@@ -19,6 +19,9 @@ const (
 
 	p10 = "http:/192.168.2.2:8080"
 	p11 = "http:///192.168.2.2:8080"
+
+	p12 = "http://192.168.2.2:40000/media/abc  def  gh.mp4"
+	p13 = "http://192.168.2.2:40000/media/abc%20%20def%20%20gh.mp4"
 )
 
 func main() {
@@ -40,6 +43,8 @@ func main() {
 
 	us(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
 	us1(p1, p2, p3, p4, p5, p6, p7, p8, p9, p11)
+	us2(p1, p2, p3, p4, p5, p6, p7, p8, p9, p11)
+	us3(p12, p13, "http://192.168.2.2:40000/file/noovo/files/布魯克林孤兒 Motherless Brooklyn.json")
 }
 
 func us(ps ...string) {
@@ -71,5 +76,34 @@ func us1(ps ...string) {
 		u.Path = path.Join(u.Path, "//abc//")
 		logger.Debug(u.String())
 
+	}
+}
+
+func us2(ps ...string) {
+	for i, p := range ps {
+		logger.Debug(i, p)
+		u, err := url.Parse(p)
+		if err != nil {
+			logger.Error(err)
+			logger.Error(u == nil)
+			continue
+		}
+
+		u.Path = path.Join(u.Path, " a b c 中文")
+		logger.Debug(u.String())
+
+	}
+}
+
+func us3(ps ...string) {
+	for i, p := range ps {
+		logger.Debug(i, p)
+		u, err := url.Parse(p)
+		if err != nil {
+			logger.Error(err)
+			logger.Error(u == nil)
+			continue
+		}
+		logger.Debug(u.String())
 	}
 }

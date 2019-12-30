@@ -50,7 +50,17 @@ func main() {
 	by, _ = json.Marshal(i)
 	logger.Debug(string(by))
 
+	var i1 A
+	json.Unmarshal(by, &i1)
+	by, _ = json.Marshal(i1)
+	logger.Debug(string(by))
+
 	by, _ = json.Marshal(make([]int, 0))
+	logger.Debug(string(by))
+
+	is := make([]int, 0)
+	json.Unmarshal([]byte("null"), &is)
+	by, _ = json.Marshal(is)
 	logger.Debug(string(by))
 
 	type TestObject struct {
