@@ -8,3 +8,4 @@ template/*/out
 .*.sh
 *.tar
 *.mp4
+.*.json
