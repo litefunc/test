@@ -45,6 +45,14 @@ func main() {
 	us1(p1, p2, p3, p4, p5, p6, p7, p8, p9, p11)
 	us2(p1, p2, p3, p4, p5, p6, p7, p8, p9, p11)
 	us3(p12, p13, "http://192.168.2.2:40000/file/noovo/files/布魯克林孤兒 Motherless Brooklyn.json")
+
+	u, err := url.Parse("http://192.168.2.2:40000")
+	if err != nil {
+		logger.Error(err)
+	}
+
+	u.Path = path.Join(u.Path, "file/noovo/files/布魯克林孤兒 Motherless Brooklyn.json")
+	logger.Debug(u.String())
 }
 
 func us(ps ...string) {

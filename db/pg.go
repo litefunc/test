@@ -3,7 +3,7 @@ package main
 import (
 	"cloud/lib/logger"
 	"cloud/server/ota/config"
-	"cloud/server/ota/models"
+	"cloud/server/ota/model/v1"
 	"context"
 	"os"
 	"time"
