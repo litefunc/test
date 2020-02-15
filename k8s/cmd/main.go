@@ -38,17 +38,15 @@ func loadbalance(url string) bool {
 	return false
 }
 
-func testLoadbalance(url string, n int) bool {
+func testLoadbalance(url string, n int) []bool {
 	var wc sync.WaitGroup
-	var success bool
 
+	var success []bool
 	for i := 0; i < n; i++ {
 		wc.Add(1)
 		go func(i int) {
 			defer wc.Done()
-			if loadbalance(url) {
-				success = true
-			}
+			success = append(success, loadbalance(url))
 
 		}(i)
 	}
@@ -58,9 +56,15 @@ func testLoadbalance(url string, n int) bool {
 }
 
 func main() {
+	// url := "http://192.168.0.12:31327"
 	url := "http://10.96.77.158:8088"
-	if success := testLoadbalance(url, 3); !success {
-		logger.Error(success)
+	list := testLoadbalance(url, 3)
+	for _, v := range list {
+		if v {
+			logger.Debug(v)
+		} else {
+			logger.Error(v)
+		}
 	}
 
 }
