@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"cloud/lib/logger"
+	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -85,11 +87,25 @@ func main() {
 
 	createFileIfNotExist(pj(dir, "test.json"))
 
-	f, err = os.OpenFile(os.Getenv("GOPATH")+"/src/test/os/docker1.json", os.O_CREATE, os.ModePerm)
+	p1 := os.Getenv("GOPATH") + "/src/test/os/docker1.json"
+	f, err = os.OpenFile(p1, os.O_CREATE, os.ModePerm)
 	if err != nil {
 		logger.Error(err)
+		return
 	}
 
+	ioutil.WriteFile(p1, []byte(`123`), os.ModePerm)
+	f.Close()
+
+	// f1, err := os.OpenFile(p1, os.O_CREATE, os.ModePerm)
+	// if err != nil {
+	// 	logger.Error(err)
+	// 	return
+	// }
+	// defer f1.Close()
+
+	bufioWrite(p1, []byte(`456`))
+	bufioWrite(p1, []byte(`456`))
 }
 
 func stat(path ...string) {
@@ -98,4 +114,23 @@ func stat(path ...string) {
 			logger.Error(err)
 		}
 	}
+}
+
+func bufioWrite(path string, data []byte) error {
+
+	f, err := os.OpenFile(path, os.O_CREATE, os.ModePerm)
+	if err != nil {
+		logger.Error(err)
+		return err
+	}
+	defer f.Close()
+
+	w := bufio.NewWriter(f)
+	n, err := w.Write(data)
+	if err != nil {
+		logger.Error(err)
+		return err
+	}
+	logger.Infof("wrote %d bytes\n", n)
+	return w.Flush()
 }

@@ -68,4 +68,6 @@ func main() {
 	diff := now.Sub(now.Add(time.Hour)).Seconds()
 	logger.Debug(diff < 0)
 	logger.Debug(uint64(diff))
+
+	logger.Debug(now.Nanosecond())
 }

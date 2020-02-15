@@ -4,13 +4,13 @@ import (
 	"cloud/lib/logger"
 	"context"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
-
-	"github.com/gin-gonic/gin"
 )
 
 type handler struct {
@@ -35,8 +35,23 @@ func (h *handler) AddN(c *gin.Context) {
 
 type handlers []http.Handler
 
+type ab struct {
+	a http.Handler
+	b http.Handler
+}
+
+func (h ab) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if strings.HasPrefix(r.URL.Path, "/a") {
+		h.a.ServeHTTP(w, r)
+	} else {
+		h.b.ServeHTTP(w, r)
+	}
+
+}
+
 func (hds handlers) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	for _, hd := range hds {
+		logger.Debug(r.URL.Path)
 		hd.ServeHTTP(w, r)
 	}
 }
@@ -44,6 +59,11 @@ func (hds handlers) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func routerA() *gin.Engine {
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
+	r.GET("/a/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})
@@ -81,7 +101,8 @@ func routerB() *gin.Engine {
 
 func main() {
 
-	hds := handlers{routerA()}
+	hds := ab{routerA(), routerB()}
+	// hds := handlers{routerA(), routerB()}
 	// r.Run() // listen and serve on 0.0.0.0:8080
 
 	addr := fmt.Sprintf(`:%d`, 8080)

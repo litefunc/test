@@ -1,0 +1,13 @@
+{
+    "log_level": 127,
+    "tick": 10,
+    "http": {
+        "token": "hDQvRGYzweMyzq7n-d7b",
+        "repos": [
+            "http://noovo-rd.loginto.me:60080/Noovo/official-website.git"
+        ]
+    },
+    "git": {
+        "repos": []
+    }
+}
