@@ -97,15 +97,15 @@ func main() {
 	ioutil.WriteFile(p1, []byte(`123`), os.ModePerm)
 	f.Close()
 
-	// f1, err := os.OpenFile(p1, os.O_CREATE, os.ModePerm)
-	// if err != nil {
-	// 	logger.Error(err)
-	// 	return
-	// }
-	// defer f1.Close()
+	f1, err := os.OpenFile(p1, os.O_CREATE, os.ModePerm)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	defer f1.Close()
 
 	bufioWrite(p1, []byte(`456`))
-	bufioWrite(p1, []byte(`456`))
+	bufioWrite(p1, []byte(`789`))
 }
 
 func stat(path ...string) {
@@ -118,7 +118,7 @@ func stat(path ...string) {
 
 func bufioWrite(path string, data []byte) error {
 
-	f, err := os.OpenFile(path, os.O_CREATE, os.ModePerm)
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, os.ModePerm)
 	if err != nil {
 		logger.Error(err)
 		return err
@@ -132,5 +132,9 @@ func bufioWrite(path string, data []byte) error {
 		return err
 	}
 	logger.Infof("wrote %d bytes\n", n)
-	return w.Flush()
+	if err := w.Flush(); err != nil {
+		logger.Error(err)
+		return err
+	}
+	return nil
 }
