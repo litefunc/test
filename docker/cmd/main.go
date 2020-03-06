@@ -25,4 +25,15 @@ func main() {
 	for i, v := range cs {
 		logger.Debug(i, v)
 	}
+
+	m := make(map[uint64]string)
+	var n uint64
+	for _, v := range cs {
+		for _, v := range v.RepoTags {
+			n++
+			m[n] = v
+			logger.Debug(n, v)
+		}
+	}
+
 }

@@ -3,11 +3,8 @@ package main
 import (
 	"bufio"
 	"cloud/lib/logger"
-	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
-	"strings"
 )
 
 func isDir(path string) (bool, error) {
@@ -55,57 +52,57 @@ func createFileIfNotExist(path string) error {
 
 func main() {
 
-	pj := path.Join
+	// pj := path.Join
 
-	p := os.Getenv("GOPATH") + "/src/test/os/testdir/docker.json"
+	// p := os.Getenv("GOPATH") + "/src/test/os/testdir/docker.json"
 
-	dir, err := filepath.Abs(filepath.Dir(p))
-	if err != nil {
-		logger.Error(err)
-		return
-	}
+	// dir, err := filepath.Abs(filepath.Dir(p))
+	// if err != nil {
+	// 	logger.Error(err)
+	// 	return
+	// }
 
-	// if err := os.RemoveAll(dir); err != nil {
+	// // if err := os.RemoveAll(dir); err != nil {
+	// // 	logger.Error(err)
+	// // }
+	// if err := os.MkdirAll(dir, os.ModePerm); err != nil {
 	// 	logger.Error(err)
 	// }
-	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
-		logger.Error(err)
-	}
-	f, err := os.OpenFile(p, os.O_CREATE, os.ModePerm)
-	if err != nil {
-		logger.Error(err)
-	}
-	defer f.Close()
+	// f, err := os.OpenFile(p, os.O_CREATE, os.ModePerm)
+	// if err != nil {
+	// 	logger.Error(err)
+	// }
+	// defer f.Close()
 
-	stat(p, "/usr/", "usr/abc", "Behind%20My%20Life/Behind%20My%20Life.jpg")
-	p = os.Getenv("GOPATH") + "/src/test/os/" + "Behind%20My%20Life/Behind%20My%20Life.jpg"
-	stat(p)
-	stat(strings.Replace(p, "%20", " ", -1))
+	// stat(p, "/usr/", "usr/abc", "Behind%20My%20Life/Behind%20My%20Life.jpg")
+	// p = os.Getenv("GOPATH") + "/src/test/os/" + "Behind%20My%20Life/Behind%20My%20Life.jpg"
+	// stat(p)
+	// stat(strings.Replace(p, "%20", " ", -1))
 
-	logger.Debug(isDir(dir))
-	logger.Debug(isDir(pj(dir, "docker.json")))
+	// logger.Debug(isDir(dir))
+	// logger.Debug(isDir(pj(dir, "docker.json")))
 
-	createFileIfNotExist(pj(dir, "test.json"))
+	// createFileIfNotExist(pj(dir, "test.json"))
 
 	p1 := os.Getenv("GOPATH") + "/src/test/os/docker1.json"
-	f, err = os.OpenFile(p1, os.O_CREATE, os.ModePerm)
-	if err != nil {
-		logger.Error(err)
-		return
-	}
+	// f, err = os.OpenFile(p1, os.O_CREATE, os.ModePerm)
+	// if err != nil {
+	// 	logger.Error(err)
+	// 	return
+	// }
 
-	ioutil.WriteFile(p1, []byte(`123`), os.ModePerm)
-	f.Close()
+	// ioutil.WriteFile(p1, []byte(`123`), os.ModePerm)
+	// f.Close()
 
-	f1, err := os.OpenFile(p1, os.O_CREATE, os.ModePerm)
-	if err != nil {
-		logger.Error(err)
-		return
-	}
-	defer f1.Close()
+	// f1, err := os.OpenFile(p1, os.O_CREATE, os.ModePerm)
+	// if err != nil {
+	// 	logger.Error(err)
+	// 	return
+	// }
+	// defer f1.Close()
 
 	bufioWrite(p1, []byte(`456`))
-	bufioWrite(p1, []byte(`789`))
+	// bufioWrite(p1, []byte(`789`))
 }
 
 func stat(path ...string) {
@@ -136,5 +133,16 @@ func bufioWrite(path string, data []byte) error {
 		logger.Error(err)
 		return err
 	}
+
+	if err := f.Chmod(os.ModePerm); err != nil {
+		logger.Error(err)
+	}
+	if err := f.Sync(); err != nil {
+		logger.Error(err)
+	}
+	if err := f.Close(); err != nil {
+		logger.Error(err)
+	}
+
 	return nil
 }

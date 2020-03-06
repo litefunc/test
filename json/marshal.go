@@ -12,6 +12,11 @@ type A struct {
 	C []int
 }
 
+type B struct {
+	A int `json:"a"`
+	B *A  `json:"b"`
+}
+
 func main() {
 	var n interface{}
 	var err error
@@ -72,4 +77,9 @@ func main() {
 	logger.Debug(data)
 	by, _ = json.Marshal(data)
 	logger.Debug(string(by))
+
+	var b B
+	logger.Debug(b)
+	json.Unmarshal([]byte(`{"a": 1, "b": {}}`), &b)
+	logger.Debug(b, *b.B)
 }

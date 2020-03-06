@@ -113,11 +113,11 @@ func main() {
 	logger.Debug(getInfo(mdas))
 	logger.Debug(getInfo(mdbs))
 
-	db.Select(mda1).Where("com=? AND gp IN(?)", 1, pq.Array([]uint64{1, 2, 3})).Order("com DESC", "gp ASC").Limit(10).SQL()
-	db.Select(&mda1).Where("com=? AND gp IN(?)", 1, pq.Array([]uint64{1, 2, 3})).Order("com DESC", "gp ASC").Limit(10).SQL()
-	db.Select(mdas).Where("com=? AND gp IN(?)", 1, pq.Array([]uint64{1, 2, 3})).Order("com DESC", "gp ASC").Limit(10).SQL()
-	db.Select(&mdas).Where("com=? AND gp IN(?)", 1, pq.Array([]uint64{1, 2, 3})).Order("com DESC", "gp ASC").Limit(10).SQL()
-	db.Select(nil).Where("com=? AND gp IN(?)", 1, pq.Array([]uint64{1, 2, 3})).Order("com DESC", "gp ASC").Limit(10).SQL()
+	db.Select(mda1).Where("com=? AND gp IN(?)", 1, pq.Array([]uint64{1, 2, 3})).OrderBy("com DESC", "gp ASC").Limit(10).SQL()
+	db.Select(&mda1).Where("com=? AND gp IN(?)", 1, pq.Array([]uint64{1, 2, 3})).OrderBy("com DESC", "gp ASC").Limit(10).SQL()
+	db.Select(mdas).Where("com=? AND gp IN(?)", 1, pq.Array([]uint64{1, 2, 3})).OrderBy("com DESC", "gp ASC").Limit(10).SQL()
+	db.Select(&mdas).Where("com=? AND gp IN(?)", 1, pq.Array([]uint64{1, 2, 3})).OrderBy("com DESC", "gp ASC").Limit(10).SQL()
+	db.Select(nil).Where("com=? AND gp IN(?)", 1, pq.Array([]uint64{1, 2, 3})).OrderBy("com DESC", "gp ASC").Limit(10).SQL()
 
 	logger.Debug(pgsql.GetValues(mda1))
 	db.Insert(mda1).SQL()

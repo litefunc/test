@@ -4,6 +4,7 @@ import (
 	"cloud/lib/logger"
 	"encoding/json"
 	"io/ioutil"
+	"os"
 )
 
 type A struct {
@@ -13,7 +14,7 @@ type A struct {
 func main() {
 
 	var by []byte
-	if err := ioutil.WriteFile("test.json", by, 0755); err != nil {
+	if err := ioutil.WriteFile("test.json", by, os.ModePerm); err != nil {
 		logger.Error(err)
 	}
 

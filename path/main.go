@@ -10,6 +10,7 @@ import (
 func main() {
 	fmt.Println(path.Join("a", "b", "/c/"))
 	fmt.Println(path.Join("/a", "b", "/c/"))
+	fmt.Println(path.Join("/a", "b", ".json"))
 	fmt.Println(path.Join("http://localhost:8080", "b", "/c/"))
 
 	u, err := url.Parse("//")
