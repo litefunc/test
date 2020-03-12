@@ -1,0 +1,5 @@
+FROM node:alpine
+
+COPY web /web
+
+CMD ["node", "/web/service.js"]
