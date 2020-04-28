@@ -1,23 +1,20 @@
-package main
+package internal
 
 import (
-	"cloud/database"
+	"cloud/database/postgresql"
 	"cloud/lib/logger"
-	"cloud/server/ota/config"
 	"database/sql"
 	"fmt"
-	"os"
 	"sync"
 	"time"
 )
 
+const query = `SELECT * FROM cloud.device_stat_vod`
+
 func conn(n int) {
 	for i := 1; i <= n; i++ {
-		config.ParseConfig(os.Getenv("GOPATH")+"/src/cloud/server/ota/config/config.local.json", &config.Config)
-		cfg := &config.Config
 
-		dbConfig := config.GetPgsqlConfig(cfg.DB)
-		db, err := database.Connect(dbConfig)
+		db, err := postgresql.Connect(dbConfig())
 		if err != nil {
 			logger.Error(err)
 			return
@@ -27,7 +24,7 @@ func conn(n int) {
 }
 
 func read(db *sql.DB, i int) {
-	rows, err := db.Query(`SELECT * FROM cloud.device_stat_vod`)
+	rows, err := db.Query(query)
 	if err != nil {
 		logger.Error(err)
 		return
@@ -37,14 +34,18 @@ func read(db *sql.DB, i int) {
 }
 
 func goread(db *sql.DB, i int, wg *sync.WaitGroup) {
-	defer wg.Done()
-	rows, err := db.Query(`SELECT * FROM cloud.device_stat_vod`)
-	if err != nil {
-		logger.Error(err)
-		return
-	}
-	defer rows.Close()
-	// fmt.Println(i)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		rows, err := db.Query(query)
+		if err != nil {
+			logger.Error(err)
+			return
+		}
+		defer rows.Close()
+		// fmt.Println(i)
+	}()
 }
 
 func chread(db *sql.DB, in, out chan int) {
@@ -53,7 +54,7 @@ func chread(db *sql.DB, in, out chan int) {
 		for i := range in {
 			func() {
 
-				rows, err := db.Query(`SELECT * FROM cloud.device_stat_vod`)
+				rows, err := db.Query(query)
 				if err != nil {
 					logger.Error(err)
 					return
@@ -66,14 +67,9 @@ func chread(db *sql.DB, in, out chan int) {
 	}()
 }
 
-func main() {
+func Read() {
 
-	config.ParseConfig(os.Getenv("GOPATH")+"/src/cloud/server/ota/config/config.local.json", &config.Config)
-	cfg := &config.Config
-
-	dbConfig := config.GetPgsqlConfig(cfg.DB)
-
-	db, err := sql.Open("postgres", dbConfig)
+	db, err := sql.Open("postgres", dbConfig())
 	if err != nil {
 		logger.Error("db connection", err)
 		return
@@ -99,8 +95,7 @@ func main() {
 
 	t1 = time.Now()
 	for i := 1; i <= n; i++ {
-		wg.Add(1)
-		go goread(db, i, wg)
+		goread(db, i, wg)
 	}
 	wg.Wait()
 	t2 = time.Now()

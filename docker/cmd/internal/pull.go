@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"Localserver/logger"
+	"cloud/lib/logger"
 	"context"
 	"encoding/json"
 	"fmt"

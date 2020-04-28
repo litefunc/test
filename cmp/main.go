@@ -1,7 +1,11 @@
 package main
 
-import "gotest.tools/assert/cmp"
+import (
+	"fmt"
+
+	"gotest.tools/assert/cmp"
+)
 
 func main() {
-	cmp.Equal(1, 2)
+	fmt.Println(cmp.Equal(1, 2))
 }

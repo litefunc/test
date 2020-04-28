@@ -1,24 +1,13 @@
-package main
+package internal
 
 import (
 	"cloud/lib/logger"
 	"cloud/server/ota/config"
 	"database/sql"
-	"fmt"
 	"os"
 )
 
-func read(db *sql.DB, i int) {
-	rows, err := db.Query(`SELECT * FROM cloud.device_stat_vod`)
-	if err != nil {
-		logger.Error(err)
-		return
-	}
-	defer rows.Close()
-	fmt.Println(i)
-}
-
-func conn(dbConfig string, n int) {
+func open(dbConfig string, n int) {
 	for i := 0; i < n; i++ {
 		db, err := sql.Open("postgres", dbConfig)
 		if err != nil {
@@ -86,12 +75,17 @@ func copyv(db *sql.DB, n int) {
 	}
 }
 
-func main() {
-
+func dbConfig() string {
 	config.ParseConfig(os.Getenv("GOPATH")+"/src/cloud/server/ota/config/config.local.json", &config.Config)
 	cfg := &config.Config
 
 	dbConfig := config.GetPgsqlConfig(cfg.DB)
+	return dbConfig
+}
+
+func Conn() {
+
+	dbConfig := dbConfig()
 
 	// conn(dbConfig, 5)
 

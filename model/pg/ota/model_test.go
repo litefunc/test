@@ -9,9 +9,10 @@ import (
 	"testing"
 	"time"
 
+	"cloud/lib/null"
+
 	"github.com/go-pg/pg"
 	"github.com/google/go-cmp/cmp"
-	"cloud/lib/null"
 )
 
 type dbLogger struct{}
@@ -20,9 +21,9 @@ func (d dbLogger) BeforeQuery(c context.Context, q *pg.QueryEvent) (context.Cont
 	return c, nil
 }
 
-func (d dbLogger) AfterQuery(c context.Context, q *pg.QueryEvent) (context.Context, error) {
+func (d dbLogger) AfterQuery(c context.Context, q *pg.QueryEvent) error {
 	fmt.Println(q.FormattedQuery())
-	return c, nil
+	return nil
 }
 
 func TestBasicCRUD(t *testing.T) {
@@ -193,7 +194,7 @@ func TestWhere(t *testing.T) {
 	}
 
 	// no update
-	if _, err := tx.Model(&MsFw{ID: md2.ID, Tag:  null.NewString("fake")}).Where("version = ?", "fake").Update(); err != nil {
+	if _, err := tx.Model(&MsFw{ID: md2.ID, Tag: null.NewString("fake")}).Where("version = ?", "fake").Update(); err != nil {
 		t.Error(err)
 		return
 	}
@@ -216,7 +217,6 @@ func TestWhere(t *testing.T) {
 		t.Error(err)
 		return
 	}
-
 
 	md22.Version = ""
 	if _, err := tx.Model(&md22).Where("version = ?", md21.Version).Update(); err != nil {

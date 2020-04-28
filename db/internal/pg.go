@@ -1,9 +1,10 @@
-package main
+package internal
 
 import (
 	"cloud/lib/logger"
 	"cloud/server/ota/config"
 	"cloud/server/ota/model/v1"
+
 	"context"
 	"os"
 	"time"
@@ -11,15 +12,15 @@ import (
 	"github.com/go-pg/pg"
 )
 
-func read(tx *pg.Tx, i int) {
-	var md models.VideoShareWithCompany
+func pgRead(tx *pg.Tx, i int) {
+	var md model.VideoShareWithCompany
 	if err := tx.Model(&md).Select(); err != nil {
 		logger.Error(err)
 	}
 	logger.Debug(i)
 }
 
-func main() {
+func PgRead() {
 	p := os.Getenv("GOPATH") + "/src/cloud/server/ota/config/config.local.json"
 	config.ParseConfig(p, &config.Config)
 	cfg := &config.Config
@@ -51,7 +52,7 @@ func main() {
 
 	cancel()
 	for i := 0; i < 10; i++ {
-		read(tx, i)
+		pgRead(tx, i)
 		time.Sleep(time.Second)
 	}
 	logger.Error(tx.Commit())

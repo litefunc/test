@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"cloud/lib/logger"
@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func read(tx *sql.Tx, i int) {
+func txRead(tx *sql.Tx, i int) {
 	rows, err := tx.Query(`SELECT * FROM cloud.device_stat_vod`)
 	if err != nil {
 		logger.Error(err)
@@ -20,7 +20,7 @@ func read(tx *sql.Tx, i int) {
 	fmt.Println(i)
 }
 
-func main() {
+func TxRead() {
 
 	config.ParseConfig(os.Getenv("GOPATH")+"/src/cloud/server/ota/config/config.local.json", &config.Config)
 	cfg := &config.Config
@@ -46,7 +46,7 @@ func main() {
 	logger.Debug(tx)
 
 	for i := 0; i < 5; i++ {
-		read(tx, i)
+		txRead(tx, i)
 		time.Sleep(time.Second)
 	}
 

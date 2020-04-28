@@ -5,6 +5,8 @@ import (
 	"log"
 	"reflect"
 	"strings"
+	"test/null"
+	"time"
 
 	"github.com/go-playground/locales/en"
 	ut "github.com/go-playground/universal-translator"
@@ -13,10 +15,12 @@ import (
 )
 
 type User struct {
-	Email    string `json:"email" validate:"required"`
-	Name     string `json:"name" validate:"required"`
-	Password string `json:"password" validate:"required"`
-	N        int    `json:"n" validate:"required,min=10"`
+	Email    string    `json:"email" validate:"required"`
+	Name     string    `json:"name" validate:"required"`
+	Password string    `json:"password" validate:"required"`
+	N        int       `json:"n" validate:"required,min=10"`
+	Time     time.Time `json:"time" validate:"required"`
+	NullTime null.Time `json:"null_time" validate:"required"`
 }
 
 func Translate() {

@@ -1,5 +1,12 @@
 package internal
 
+import (
+	"cloud/lib/logger"
+	"errors"
+	"os/exec"
+	"strings"
+)
+
 func cmd(args ...string) (string, error) {
 	out, err := exec.Command("docker", args...).CombinedOutput()
 	logger.Warn("docker", strings.Join(args, " "))

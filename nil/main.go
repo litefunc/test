@@ -33,5 +33,5 @@ func main() {
 	var by []byte
 	by = nil
 	fmt.Println(len(by))
-
+	fmt.Println(string(by))
 }
