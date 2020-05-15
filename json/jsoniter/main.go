@@ -14,18 +14,22 @@ type ColorGroup struct {
 
 func main() {
 
-	// group := ColorGroup{
-	// 	ID:     1,
-	// 	Name:   "Reds",
-	// 	Colors: []string{"Crimson", "Red", "Ruby", "Maroon"},
-	// }
-	b, err := jsoniter.Marshal(`{"ID":1,"Name":"Reds","Colors":["Crimson","Red","Ruby","Maroon"]}`)
+	group := ColorGroup{
+		ID:     1,
+		Name:   "Reds",
+		Colors: []string{"Crimson", "Red", "Ruby", "Maroon"},
+	}
+	// b, err := jsoniter.Marshal(`{"ID":1,"Name":"Reds","Colors":["Crimson","Red","Ruby","Maroon"]}`)
+	b, err := jsoniter.Marshal(group)
 	if err != nil {
 		logger.Error(err)
 		return
 	}
 	logger.Debug(string(b))
-	logger.Debug(jsoniter.Get(b, "Colors", 0).ToString())
+	var list []string
+	jsoniter.Get(b, "Colors").ToVal(&list)
+	logger.Debug(list)
+	logger.Debug(jsoniter.Get(b, "Colors", 10).ToString())
 
 	val := []byte(`{"ID":1,"Name":"Reds","Colors":["Crimson","Red","Ruby","Maroon"]}`)
 	logger.Debug(string(val))
