@@ -45,11 +45,11 @@ func main() {
 	getTlsInsecure("https://127.0.0.1:443/hello")
 	getTls("https://127.0.0.1:443/hello", path.Join(os.Getenv("GOPATH"), "/src/test/openssl/static/server.crt"))
 
-	getTls("https://127.0.0.1:40000/token/new", path.Join(os.Getenv("GOPATH"), "/src/test/openssl/static/server.crt"))
-	getTls("http://127.0.0.1:40000/token/new", path.Join(os.Getenv("GOPATH"), "/src/MediaImage/assets/ssl/server.crt"))
-	getTls("https://127.0.0.1:40000/token/new", path.Join(os.Getenv("GOPATH"), "/src/MediaImage/assets/ssl/server.crt"))
-	getTls("https://192.168.2.2:40001/token/new", path.Join(os.Getenv("GOPATH"), "/src/MediaImage/assets/ssl/server.crt"))
-	getTls("https://192.168.2.2:40001/vod/list", path.Join(os.Getenv("GOPATH"), "/src/MediaImage/assets/ssl/server.crt"))
+	// getTls("https://127.0.0.1:40000/token/new", path.Join(os.Getenv("GOPATH"), "/src/test/openssl/static/server.crt"))
+	// getTls("http://127.0.0.1:40000/token/new", path.Join(os.Getenv("GOPATH"), "/src/MediaImage/assets/ssl/server.crt"))
+	// getTls("https://127.0.0.1:40000/token/new", path.Join(os.Getenv("GOPATH"), "/src/MediaImage/assets/ssl/server.crt"))
+	// getTls("https://192.168.2.2:40001/token/new", path.Join(os.Getenv("GOPATH"), "/src/MediaImage/assets/ssl/server.crt"))
+	// getTls("https://192.168.2.2:40001/vod/list", path.Join(os.Getenv("GOPATH"), "/src/MediaImage/assets/ssl/server.crt"))
 }
 
 func get(url string) {

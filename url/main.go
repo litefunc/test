@@ -52,7 +52,7 @@ func main() {
 	}
 
 	u.Path = path.Join(u.Path, "file/noovo/files/布魯克林孤兒 Motherless Brooklyn.json")
-	logger.Debug(u.String())
+	us3(u.String())
 }
 
 func us(ps ...string) {
@@ -113,5 +113,6 @@ func us3(ps ...string) {
 			continue
 		}
 		logger.Debug(u.String())
+		logger.Debug(u.String() == p)
 	}
 }

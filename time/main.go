@@ -4,7 +4,6 @@ import (
 	"cloud/lib/logger"
 	"cloud/lib/null"
 	"encoding/json"
-	"fmt"
 	"time"
 )
 
@@ -22,16 +21,26 @@ type T3 struct {
 
 func main() {
 
+	now := time.Now()
+	logger.Debug(now, now.String())
+	logger.Debug(now.UTC(), now.UTC().String())
+
 	layout := "2006-01-02"
 	str := "2014-11-12"
-	t, err := time.Parse(layout, str)
-
+	_, err := time.Parse(layout, str)
 	if err != nil {
-		fmt.Println(err)
+		logger.Error(err)
 	}
-	fmt.Println(t.Format(layout))
+	_, err = time.Parse(time.RFC3339, str)
+	if err != nil {
+		logger.Error(err)
+	}
+	t, err := time.Parse("01/02/2006", "05/12/1993")
+	if err != nil {
+		logger.Error(err)
+	}
+	logger.Debug(t)
 
-	now := time.Now().UTC()
 	logger.Debug(now.Format(time.RFC3339))
 	logger.Debug(now.Unix())
 	logger.Debug(now.UnixNano())
@@ -70,4 +79,8 @@ func main() {
 	logger.Debug(uint64(diff))
 
 	logger.Debug(now.Nanosecond())
+
+	var t0 time.Time
+	logger.Debug(t0.Unix(), t0.UTC().String(), t0.String(), t0.IsZero())
+
 }

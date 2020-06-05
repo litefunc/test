@@ -125,5 +125,6 @@ func hello(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "r.URL.Host: %s\n", r.URL.Host)
 	fmt.Fprintf(w, "r.URL.Path: %q\n", html.EscapeString(r.URL.Path))
 	fmt.Fprintf(w, "r.RemoteAddr: %s\n", r.RemoteAddr)
-	fmt.Fprintf(w, "r.RequestURI : %s\n", r.RequestURI)
+	fmt.Fprintf(w, "r.RequestURI: %s\n", r.RequestURI)
+	fmt.Fprintf(w, "X-FORWARDED-FOR: %s\n", r.Header.Get("X-FORWARDED-FOR"))
 }
