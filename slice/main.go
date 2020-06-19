@@ -29,6 +29,10 @@ func add(list ints, n int) {
 	}
 }
 
+func (list ints) append(n int) {
+	list = append(list, n)
+}
+
 type S2 struct {
 	A []int
 	B []int
@@ -64,6 +68,8 @@ func main() {
 	is.add(1)
 	logger.Debug(is)
 	add(is, 1)
+	logger.Debug(is)
+	is.append(5)
 	logger.Debug(is)
 
 	s5 := S2{A: []int{1, 2, 3}}
