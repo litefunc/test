@@ -1,0 +1,16 @@
+123
+
+panic: 1
+
+goroutine 6 [running]:
+main.p2()
+	/home/david/program/go/src/test/log/main.go:36 +0x39
+created by main.p1
+	/home/david/program/go/src/test/log/main.go:31 +0x35
+panic: 2
+
+goroutine 18 [running]:
+main.p2()
+	/home/david/program/go/src/test/log/main.go:36 +0x39
+created by main.p1
+	/home/david/program/go/src/test/log/main.go:31 +0x35

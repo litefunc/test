@@ -1,0 +1,19 @@
+// 撰寫格式是 Proto v3。
+syntax = "proto3";
+// 生成的程式在 Golang 中將會屬於 `pb` 套件。
+
+package hello;
+
+
+
+service HelloService {
+    rpc SayHello (stream HelloRequest) returns (stream HelloResponse);
+}
+  
+message HelloRequest {
+    string greeting = 1;
+}
+  
+message HelloResponse {
+string reply = 1;
+}

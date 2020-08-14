@@ -34,4 +34,6 @@ func main() {
 	for i, s := range ss {
 		logger.Debug(i, len(s), s)
 	}
+
+	logger.Debug("" >= "2030378@f1b8cd7b")
 }

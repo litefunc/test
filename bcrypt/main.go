@@ -1,7 +1,7 @@
 package main
 
 import (
-	"VodoPlay/logger"
+	"cloud/lib/logger"
 
 	"golang.org/x/crypto/bcrypt"
 )
