@@ -1,7 +1,8 @@
 package server
 
 import (
-	"MediaImage/logger"
+	"cloud/lib/logger"
+	"context"
 	"fmt"
 	"log"
 	"net"
@@ -24,31 +25,53 @@ func (rec *HelloServer) SayHello(stream hello.HelloService_SayHelloServer) error
 
 	i, ch := rec.Add()
 
+	waitc := make(chan error, 1)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	go func() {
+
 		for {
-			_, err := stream.Recv()
-			if err != nil {
-				logger.Error(err)
-				continue
-			}
+			select {
+			case <-ctx.Done():
+				logger.Warn("stop receiving from Deploy_GetMsgClient:", i)
+				return
+			default:
+				_, err := stream.Recv()
+				if err != nil {
+					logger.Error(err)
+					logger.Warn("connection from Deploy_GetMsgClient:", i, "closed")
+					waitc <- err
+					return
+				}
 
+			}
 		}
+
 	}()
 
 	go func() {
-		for s := range ch {
-			reply := &hello.HelloResponse{Reply: s}
-			logger.Debug("send:", i, reply)
-			if err := stream.Send(reply); err != nil {
-				logger.Error(err)
+
+		for {
+			select {
+			case <-ctx.Done():
+				logger.Warn("stop sending to Deploy_GetMsgClient:", i)
+				return
+			case s := <-ch:
+				reply := &hello.HelloResponse{Reply: s}
+				logger.Debug("send:", i, reply)
+				if err := stream.Send(reply); err != nil {
+					logger.Error(err)
+					waitc <- err
+					return
+				}
 			}
 		}
+
 	}()
 
-	var wc chan struct{}
-	<-wc
-
-	return nil
+	return <-waitc
 
 }
 
