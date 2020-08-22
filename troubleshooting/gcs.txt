@@ -1,0 +1,14 @@
+gcs下載到一半如果斷線
+
+等到最後會出現read tcp 192.168.0.9:34030->216.58.200.240:443: read: connection timed out
+
+或是...dial tcp 216.58.200.240:443: i/o timeout
+
+如果一開始就沒網路會出現
+... oauth2: cannot fetch token: Post "https://accounts.google.com/o/oauth2/token": dial tcp: lookup accounts.google.com: no such host
+
+
+如果只斷線一下下還是可以繼續下載
+
+斷線太久再恢復連線可能會出現
+read tcp 192.168.0.9:34156->216.58.200.240:443: read: connection reset by peer

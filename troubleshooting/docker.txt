@@ -1,0 +1,12 @@
+
+docker pull 到一半網路斷線約1分鐘後再恢復連線，還是會繼續下載
+
+若斷線太久會出現retrying的訊息
+
+再更久就會出現dial tcp: lookup {repo}: no such host 然後結束下載
+
+
+若一開始下載就沒有網路會出現
+Error response from daemon: Get https://{repo}/v2/: net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)
+
+若下載到一半按ctrl+c，原來已經下載好的layer也不會保存
