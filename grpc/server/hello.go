@@ -24,7 +24,7 @@ type HelloServer struct {
 func (rec *HelloServer) SayHello(stream hello.HelloService_SayHelloServer) error {
 
 	i, ch := rec.Add()
-
+	go rec.tick(i, ch)
 	waitc := make(chan error, 1)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -38,13 +38,14 @@ func (rec *HelloServer) SayHello(stream hello.HelloService_SayHelloServer) error
 				logger.Warn("stop receiving from Deploy_GetMsgClient:", i)
 				return
 			default:
-				_, err := stream.Recv()
+				in, err := stream.Recv()
 				if err != nil {
 					logger.Error(err)
 					logger.Warn("connection from Deploy_GetMsgClient:", i, "closed")
 					waitc <- err
 					return
 				}
+				logger.Warnf("recv:%+v from:%d", in, i)
 
 			}
 		}
@@ -60,7 +61,7 @@ func (rec *HelloServer) SayHello(stream hello.HelloService_SayHelloServer) error
 				return
 			case s := <-ch:
 				reply := &hello.HelloResponse{Reply: s}
-				logger.Debug("send:", i, reply)
+				logger.Infof("send:%+v to %d", reply, i)
 				if err := stream.Send(reply); err != nil {
 					logger.Error(err)
 					waitc <- err
@@ -113,4 +114,13 @@ func (rec *HelloServer) Add() (int, chan string) {
 	ch := make(chan string)
 	rec.reply[rec.n] = ch
 	return rec.n, ch
+}
+
+func (rec HelloServer) tick(i int, ch chan string) {
+	var n int
+	for {
+		time.Sleep(time.Second * 3)
+		ch <- fmt.Sprintf("server msg %d %d", i, n)
+		n++
+	}
 }
