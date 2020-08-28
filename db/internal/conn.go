@@ -96,9 +96,9 @@ func Conn() {
 	}
 	defer db.Close()
 
-	// begin(db, 5)
+	begin(db, 5)
 	// maxIdleConns(db, 5, 10)
-	copyv(db, 10)
+	// copyv(db, 10)
 
 	// read(db, 0)
 	// read(db1, 1)

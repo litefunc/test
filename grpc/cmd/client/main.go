@@ -6,11 +6,11 @@ import (
 )
 
 func main() {
+
+	host := "localhost"
 	port := 8090
 
-	cli := client.NewHelloClient(fmt.Sprintf(`localhost:%d`, port))
-	go cli.SayHello()
+	cli := client.NewHelloClient(fmt.Sprintf(`%s:%d`, host, port))
+	cli.SayHello()
 
-	var wc chan struct{}
-	<-wc
 }

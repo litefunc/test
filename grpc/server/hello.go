@@ -24,7 +24,8 @@ type HelloServer struct {
 func (rec *HelloServer) SayHello(stream hello.HelloService_SayHelloServer) error {
 
 	i, ch := rec.Add()
-	go rec.tick(i, ch)
+	defer rec.Delete(i)
+	// go rec.tick(i, ch)
 	waitc := make(chan error, 1)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -35,13 +36,13 @@ func (rec *HelloServer) SayHello(stream hello.HelloService_SayHelloServer) error
 		for {
 			select {
 			case <-ctx.Done():
-				logger.Warn("stop receiving from Deploy_GetMsgClient:", i)
+				logger.Warn("stop receiving from:", i)
 				return
 			default:
 				in, err := stream.Recv()
 				if err != nil {
 					logger.Error(err)
-					logger.Warn("connection from Deploy_GetMsgClient:", i, "closed")
+					logger.Warn("connection from:", i, "closed")
 					waitc <- err
 					return
 				}
@@ -57,7 +58,7 @@ func (rec *HelloServer) SayHello(stream hello.HelloService_SayHelloServer) error
 		for {
 			select {
 			case <-ctx.Done():
-				logger.Warn("stop sending to Deploy_GetMsgClient:", i)
+				logger.Warn("stop sending to:", i)
 				return
 			case s := <-ch:
 				reply := &hello.HelloResponse{Reply: s}
@@ -90,6 +91,7 @@ func NewHelloServer(port int) *HelloServer {
 	}
 	grpcServer := grpc.NewServer(
 		grpc.KeepaliveParams(keepalive.ServerParameters{
+			Time:    time.Second * 10,
 			Timeout: time.Second * 10,
 		}),
 	)
@@ -113,7 +115,17 @@ func (rec *HelloServer) Add() (int, chan string) {
 	rec.n++
 	ch := make(chan string)
 	rec.reply[rec.n] = ch
+	logger.Info("add:", rec.n)
 	return rec.n, ch
+}
+
+func (rec *HelloServer) Delete(i int) {
+	rec.mu.Lock()
+	defer rec.mu.Unlock()
+
+	delete(rec.reply, i)
+	logger.Info("delete:", rec.n)
+	return
 }
 
 func (rec HelloServer) tick(i int, ch chan string) {

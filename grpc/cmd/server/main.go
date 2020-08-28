@@ -9,7 +9,7 @@ func main() {
 
 	ser := server.NewHelloServer(port)
 
-	for _, s := range []string{"a", "b", "c", "d", "e"} {
+	for _, s := range []string{"a", "b", "c"} {
 		ser.Send(s)
 	}
 
