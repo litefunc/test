@@ -45,7 +45,8 @@ func main() {
 
 	// dialer := net.Dialer{LocalAddr: netAddr, Timeout: time.Second}
 
-	RemoteEP := net.TCPAddr{IP: net.ParseIP("127.0.0.1"), Port: 8090}
+	RemoteEP := net.TCPAddr{Port: 8090}
+	// RemoteEP := net.TCPAddr{IP: net.ParseIP("127.0.0.1"), Port: 8090}
 	conn, err := net.DialTCP("tcp", netAddr, &RemoteEP)
 	// conn, err := dialer.Dial("tcp", "localhost:8090")
 	if err != nil {
@@ -63,9 +64,9 @@ func main() {
 	for i := 0; i < 10; i++ {
 		get(client, "http://localhost:8090")
 	}
-	if err := conn.Close(); err != nil {
-		logger.Error(err)
-	}
+	// if err := conn.Close(); err != nil {
+	// 	logger.Error(err)
+	// }
 	time.Sleep(time.Second * 10)
 	// for i := 0; i < 10; i++ {
 	// 	get(client, "http://localhost:8090")

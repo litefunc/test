@@ -9,7 +9,7 @@ import (
 
 func main() {
 
-	internal.SetStderr("logfile.txt")
+	// internal.SetStderr("logfile.txt")
 
 	// panic(3)
 
@@ -23,7 +23,7 @@ func main() {
 	// 	}
 	// }()
 
-	p1()
+	for 
 }
 
 func p1() {
