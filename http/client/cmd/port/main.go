@@ -9,20 +9,6 @@ import (
 	"time"
 )
 
-func DialCustom(network, address string, localIP []byte, localPort int) *net.Dialer {
-	netAddr := &net.TCPAddr{Port: localPort}
-
-	if len(localIP) != 0 {
-		netAddr.IP = localIP
-	}
-
-	fmt.Println("netAddr:", netAddr)
-
-	d := net.Dialer{LocalAddr: netAddr}
-
-	return &d
-}
-
 type connDialer struct {
 	c net.Conn
 }
@@ -31,24 +17,49 @@ func (cd connDialer) Dial(network, addr string) (net.Conn, error) {
 	return cd.c, nil
 }
 
-func main() {
+type dialer struct {
+	src *net.TCPAddr
+}
 
-	localIP := []byte{} //  any IP，不指定IP
-	localPort := 9001   // 指定端口
-
-	netAddr := &net.TCPAddr{Port: localPort}
-	if len(localIP) != 0 {
-		netAddr.IP = localIP
+func (cd dialer) Dial(network, addr string) (net.Conn, error) {
+	dst, err := net.ResolveTCPAddr(network, addr)
+	if err != nil {
+		logger.Error(err)
+		return nil, err
 	}
+	conn, err := net.DialTCP(network, cd.src, dst)
+	if err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+	if err := conn.SetLinger(0); err != nil {
+		logger.Error(err)
+	}
+	return conn, nil
+}
 
-	fmt.Println("netAddr:", netAddr)
+func dial() {
+	localPort := 9001
+	dialer := dialer{src: &net.TCPAddr{Port: localPort}}
+	client := &http.Client{
+		Transport: &http.Transport{
+			Dial: dialer.Dial,
+		},
+	}
+	defer client.CloseIdleConnections()
+	for i := 0; i < 10; i++ {
+		get(client, "http://localhost:8090")
+	}
+	time.Sleep(time.Second * 10)
+}
 
-	// dialer := net.Dialer{LocalAddr: netAddr, Timeout: time.Second}
+func dial1() {
 
-	RemoteEP := net.TCPAddr{Port: 8090}
-	// RemoteEP := net.TCPAddr{IP: net.ParseIP("127.0.0.1"), Port: 8090}
+	localPort := 9001
+	netAddr := &net.TCPAddr{Port: localPort}
+
+	RemoteEP := net.TCPAddr{IP: net.ParseIP("127.0.0.1"), Port: 8090}
 	conn, err := net.DialTCP("tcp", netAddr, &RemoteEP)
-	// conn, err := dialer.Dial("tcp", "localhost:8090")
 	if err != nil {
 		logger.Error(err)
 		return
@@ -64,17 +75,11 @@ func main() {
 	for i := 0; i < 10; i++ {
 		get(client, "http://localhost:8090")
 	}
-	// if err := conn.Close(); err != nil {
-	// 	logger.Error(err)
-	// }
 	time.Sleep(time.Second * 10)
-	// for i := 0; i < 10; i++ {
-	// 	get(client, "http://localhost:8090")
-	// }
+}
 
-	// client.CloseIdleConnections()
-
-	// time.Sleep(time.Second * 60)
+func main() {
+	dial()
 }
 
 func get(cli *http.Client, url string) {
