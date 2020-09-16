@@ -10,3 +10,29 @@ docker pull 到一半網路斷線約1分鐘後再恢復連線，還是會繼續�
 Error response from daemon: Get https://{repo}/v2/: net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)
 
 若下載到一半按ctrl+c，原來已經下載好的layer也不會保存
+
+
+# docker 預設可以連到網際網路
+# 若在 network 等於 bridge（介面docker0） 的情況下container無法連網
+
+1. 檢查host是否啟用router功能
+
+關閉router功能
+echo 0 > /proc/sys/net/ipv4/ip_forward
+
+啟動router功能
+echo 1 > /proc/sys/net/ipv4/ip_forward
+
+2. 檢查防火牆設定 iptables-save -t nat 
+
+修改來源ip屬於網段172.17.0.0/16 的封包, 把他們的來源ip改為非docker0
+iptables -t nat -A POSTROUTING -s 172.17.0.0/16 ! -o docker0 -j MASQUERADE
+
+或者修改來源ip屬於網段172.17.0.0/16 的封包, 把他們的來源ip改為eth0
+iptables -t nat -A POSTROUTING -s 172.17.0.0/16 -o eth0 -j MASQUERADE
+
+
+# docker-compose 預設可以連到網際網路
+docker-compose bridge driver介面為br-xxxxxxxxxxxx, 非docker0
+
+這些修改只是暫時的, 重開機後就不見了

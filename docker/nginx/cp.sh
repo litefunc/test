@@ -19,4 +19,4 @@ docker cp $FILE_DIR/nginx.conf web:/etc/nginx/conf.d/nginx.conf
 
 # docker cp $FILE_DIR/web web:/usr/share/nginx/html/web
 
-docker cp index.html demo:/etc/nginx/conf.d/nginx.conf
+# docker cp index.html demo:/etc/nginx/conf.d/nginx.conf

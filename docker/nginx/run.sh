@@ -28,3 +28,5 @@ docker run -d --name web --network host \
 docker run --name web \
     -v /home/david/program/go/src/test/docker/nginx/html:/usr/share/nginx/html \
     -v /home/david/program/go/src/test/docker/nginx/volumn:/root/volumn -d nginx
+
+docker run -d --name web -p 80:80 nginx
