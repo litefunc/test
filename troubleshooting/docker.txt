@@ -25,6 +25,9 @@ echo 1 > /proc/sys/net/ipv4/ip_forward
 
 2. 檢查防火牆設定 iptables-save -t nat 
 
+router不認得172.x.x.x, 封包雖然出得去
+但收到回應封包，router根據封包序號把目標ip改成172.x.x.x之後就無法再繼續傳送
+
 修改來源ip屬於網段172.17.0.0/16 的封包, 把他們的來源ip改為非docker0
 iptables -t nat -A POSTROUTING -s 172.17.0.0/16 ! -o docker0 -j MASQUERADE
 
