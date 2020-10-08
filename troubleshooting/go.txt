@@ -1,0 +1,6 @@
+
+# go build arm64
+
+sudo apt-get install gcc-aarch64-linux-gnu
+
+CGO_ENABLED=1 GOOS=linux GOARCH=arm64 go build

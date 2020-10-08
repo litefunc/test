@@ -2,97 +2,32 @@ package main
 
 import (
 	"VodoPlay/logger"
-	"fmt"
+	"test/jwt/internal"
 	"time"
-
-	"github.com/dgrijalva/jwt-go"
 )
 
 func main() {
-	now := time.Now().UTC()
 
-	m := make(map[string]bool)
-	m1 := make(map[string]bool)
-	m2 := make(map[string]bool)
+	s1 := "!qaz2wsx"
+	s2 := "test2"
+	tk1 := internal.Gen("1", s1, time.Hour*24*365)
+	tk2 := internal.Gen("2", s2, time.Second)
+	tk3 := internal.Gen("3", s1, time.Second)
+	tk4 := internal.Gen("4", s2, time.Second)
 
-	n := 100
-
-	logger.Info(0)
-	for i := 0; i < n; i++ {
-		tk := gen(now)
-		if duplicate(m, tk) {
-			logger.Warn(true)
-			break
-		}
+	for i, v := range []string{tk1, tk2, tk3, tk4} {
+		logger.Debug(i, v)
 	}
-	logger.Info(1)
-	for i := 0; i < n; i++ {
-		tk := gen1(now)
-		if duplicate(m1, tk) {
-			logger.Warn(true)
-			break
-		}
-	}
-	logger.Info(2)
-	for i := 0; i < n; i++ {
 
-		tk := gen2()
-		if duplicate(m2, tk) {
-			logger.Warn(true)
-			break
-		}
-	}
-}
+	time.Sleep(time.Second * 2)
 
-func duplicate(m map[string]bool, tk string) bool {
-	if _, ok := m[tk]; ok {
-		return true
-	}
-	m[tk] = true
-	return false
-}
+	internal.Validate(1, s1, tk1)
+	internal.Validate(2, s1, tk2)
+	internal.Validate(3, s2, tk1)
+	internal.Validate(4, s2, tk2)
 
-func gen(exp time.Time) string {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sn":         "N0001",
-		"mac":        "ab:01:23:cd:45:67",
-		"expiredate": exp,
-	})
-
-	mySigningKey := []byte(fmt.Sprintf(`%s%d`, "test", time.Now().Nanosecond()))
-	t, err := token.SignedString(mySigningKey)
-	if err != nil {
-		logger.Panic(err)
-	}
-	return t
-}
-
-func gen1(exp time.Time) string {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sn":         "N0001",
-		"mac":        "ab:01:23:cd:45:67",
-		"expiredate": exp,
-	})
-
-	mySigningKey := []byte(fmt.Sprintf(`%s%d`, "test", 1))
-	t, err := token.SignedString(mySigningKey)
-	if err != nil {
-		logger.Panic(err)
-	}
-	return t
-}
-
-func gen2() string {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sn":         "N0001",
-		"mac":        "ab:01:23:cd:45:67",
-		"expiredate": time.Now().UTC(),
-	})
-
-	mySigningKey := []byte(fmt.Sprintf(`%s%d`, "test", 2))
-	t, err := token.SignedString(mySigningKey)
-	if err != nil {
-		logger.Panic(err)
-	}
-	return t
+	internal.Validate(5, s1, tk3)
+	internal.Validate(6, s1, tk4)
+	internal.Validate(7, s2, tk3)
+	internal.Validate(8, s2, tk4)
 }

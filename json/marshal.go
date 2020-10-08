@@ -4,6 +4,7 @@ import (
 	"VodoPlay/logger"
 	"encoding/json"
 	"math"
+	"time"
 )
 
 type A struct {
@@ -91,6 +92,19 @@ func main() {
 	by, err = json.Marshal(c)
 	if err != nil {
 		logger.Error(err)
+	}
+	logger.Debug(string(by))
+
+	j(time.Hour * 365)
+
+}
+
+func j(o interface{}) {
+	logger.Debug(o)
+	by, err := json.Marshal(o)
+	if err != nil {
+		logger.Error(err)
+		return
 	}
 	logger.Debug(string(by))
 }
