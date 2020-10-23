@@ -101,7 +101,7 @@ func main() {
 	// }
 	// defer f1.Close()
 
-	bufioWrite(p1, []byte(`456`))
+	bufioWrite(p1, []byte(`abc`))
 	// bufioWrite(p1, []byte(`789`))
 }
 
