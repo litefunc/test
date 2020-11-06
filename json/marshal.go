@@ -97,6 +97,13 @@ func main() {
 
 	j(time.Hour * 365)
 
+	m := map[int]int{
+		1: 1,
+		2: 2,
+		3: 3,
+	}
+	j(m)
+
 }
 
 func j(o interface{}) {

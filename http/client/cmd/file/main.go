@@ -20,6 +20,7 @@ func get(url string) {
 		logger.Debug(i, v, string(by[i]))
 	}
 	logger.Debug(len(by))
+
 }
 
 func main() {

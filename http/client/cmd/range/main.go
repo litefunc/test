@@ -140,22 +140,13 @@ func Get(url string) ([]byte, error) {
 }
 
 func main() {
+	url := "http://i.imgur.com/z4d4kWk.jpg"
 
-	// cli := internal.NewClient(1048576 * 100)
+	by, _ := internal.Get(url)
 
-	us := []string{}
-	var b []byte
-	var err error
+	d := internal.NewDivision(uint64(len(by)), uint64(1024*100), uint64(0))
 
-	b, err = get(us[1])
-	logger.Debug(len(b), err)
-	// logger.Debug(string(b))
-
-	// b, err = cli.Get(us[1])
-	// logger.Debug(len(b), err)
-	// logger.Debug(string(b))
-
-	internal.RangeGet(us[1])
-	logger.Debug(len(b), err)
-
+	cli := internal.NewClient()
+	cli.DownloadFile(url, "file")
+	cli.RangeDownloadFile(url, "file", d)
 }

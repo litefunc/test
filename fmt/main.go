@@ -1,12 +1,12 @@
 package main
 
 import (
-	"cloud/lib/logger"
-	"errors"
+	"VodoPlay/logger"
 	"fmt"
 )
 
 func main() {
-	err := fmt.Errorf(`%v, %v`, errors.New("e1"), errors.New("e2"))
-	logger.Debug(err)
+
+	logger.Debug(fmt.Sprintf("%.2f", 12.345))
+	logger.Debug(fmt.Sprintf("%.2f", 12.344))
 }

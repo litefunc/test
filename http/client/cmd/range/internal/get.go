@@ -1,73 +1,75 @@
 package internal
 
 import (
+	"VodoPlay/logger"
+	"crypto/md5"
 	"fmt"
+	"io"
 	"io/ioutil"
-	"mstore/logger"
+	"os"
+
 	"net/http"
 	"strconv"
 	"time"
 )
 
 type Range struct {
-	Id    uint64
 	Start uint64
 	End   uint64
 }
 
 type Ranges []Range
 
-type division struct {
-	total   uint64
-	partial uint64
-	exclude uint64
-	startId uint64
+type Division struct {
+	Total   uint64
+	Partial uint64
+	Start   uint64
 }
 
-func getRanges(d division) Ranges {
+func NewDivision(total, partial, start uint64) Division {
+	return Division{Total: total, Partial: partial, Start: start}
+}
+
+func (rec Division) Ranges() (Ranges, error) {
 
 	rgs := Ranges{}
 
 	// return if parameter invalid
-	if d.total == 0 || d.partial == 0 || d.total < d.exclude {
-		return rgs
+	if rec.Total == 0 || rec.Partial == 0 || rec.Total < rec.Start {
+		return rgs, fmt.Errorf(`Parameter invalid:%+v`, rec)
 	}
 
-	id := d.startId
+	start := rec.Start
+	end := rec.Start
 
-	start := d.exclude
-	end := d.exclude
+	for end < (rec.Total - 1) {
 
-	for end < (d.total - 1) {
+		end = start + rec.Partial - 1
 
-		end = start + d.partial - 1
-
-		if end >= d.total {
-			end = d.total - 1
+		if end >= rec.Total {
+			end = rec.Total - 1
 		}
 
 		rg := Range{
-			Id:    id,
 			Start: start,
 			End:   end,
 		}
+		logger.Debug(rg)
 		rgs = append(rgs, rg)
 
-		id++
 		start = end + 1
 	}
 
-	return rgs
+	return rgs, nil
 }
 
-func rangeGet(url string, start, end uint64) ([]byte, error) {
-
+func (rec Range) GetResponse(url string) (*http.Response, error) {
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		logger.Error(err)
 		return nil, err
 	}
-	req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", start, end))
+	req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", rec.Start, rec.End))
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -75,30 +77,93 @@ func rangeGet(url string, start, end uint64) ([]byte, error) {
 		logger.Error(err)
 		return nil, err
 	}
+	return resp, nil
+}
+
+func (rec Range) GetBody(url string) ([]byte, error) {
+
+	resp, err := rec.GetResponse(url)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
+
 	by, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		logger.Error(err)
 		return nil, err
 	}
-	// logger.Debug(string(by))
 
 	return by, nil
 }
 
-func rangeGets(url string, rs Ranges) ([]byte, error) {
+func (rec Ranges) GetBody(url string) ([]byte, error) {
 
 	var bys []byte
-	for _, v := range rs {
+	for _, v := range rec {
 
-		by, err := rangeGet(url, v.Start, v.End)
+		by, err := v.GetBody(url)
 		if err != nil {
-			return nil, err
+			return bys, err
 		}
 		bys = append(bys, by...)
 	}
 
 	return bys, nil
+}
+
+func (rec Range) DownloadFile(url, filepath string) error {
+
+	resp, err := rec.GetResponse(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	f, err := os.OpenFile(filepath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, os.ModePerm)
+	if err != nil {
+		logger.Error(err)
+		return err
+	}
+	defer f.Close()
+
+	if _, err := io.Copy(f, resp.Body); err != nil {
+		logger.Error(err)
+		return err
+	}
+
+	return nil
+}
+
+func (rec Ranges) DownloadFile(url, filepath string) error {
+
+	for _, v := range rec {
+		if err := v.DownloadFile(url, filepath); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (rec Division) GetBody(url string) ([]byte, error) {
+
+	rs, err := rec.Ranges()
+	if err != nil {
+		return nil, err
+	}
+
+	return rs.GetBody(url)
+}
+
+func (rec Division) DownloadFile(url, filepath string) error {
+
+	rs, err := rec.Ranges()
+	if err != nil {
+		return err
+	}
+
+	return rs.DownloadFile(url, filepath)
 }
 
 type header struct {
@@ -133,7 +198,7 @@ func getHeader(url string) (header, error) {
 
 }
 
-func get(url string) ([]byte, error) {
+func Get(url string) ([]byte, error) {
 	t1 := time.Now()
 	resp, err := http.Get(url)
 	if err != nil {
@@ -148,22 +213,99 @@ func get(url string) ([]byte, error) {
 		return nil, err
 	}
 	// logger.Debug(string(by))
+	logger.Debug(len(by))
 
 	diff := time.Now().Sub(t1)
 	logger.Debug(diff)
 
+	h := md5.New()
+	if _, err := h.Write(by); err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+	ck := fmt.Sprintf(`%x`, h.Sum(nil))
+	logger.Debug(ck)
+
 	return by, nil
 }
 
+func DownloadFile(url, filepath string) error {
+
+	// Get the data
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	f, err := os.OpenFile(filepath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, os.ModePerm)
+	if err != nil {
+		logger.Error(err)
+		return err
+	}
+	defer f.Close()
+
+	// Write the body to file
+	_, err = io.Copy(f, resp.Body)
+	return err
+}
+
 type Client struct {
-	Size uint64
 }
 
-func NewClient(size uint64) *Client {
-	return &Client{Size: size}
+func NewClient() *Client {
+	return &Client{}
 }
 
-func (rec Client) Get(url string) ([]byte, error) {
+func (rec Client) DownloadFile(url, filepath string) error {
+	if err := os.Remove(filepath); err != nil && !os.IsNotExist(err) {
+		logger.Error(err)
+		return err
+	}
+
+	t1 := time.Now()
+
+	if err := DownloadFile(url, filepath); err != nil {
+		return err
+	}
+
+	diff := time.Now().Sub(t1)
+	logger.Debug(diff)
+
+	s, err := Md5Sum(filepath)
+	if err != nil {
+		return err
+	}
+	logger.Debug(s)
+
+	return nil
+}
+
+func (rec Client) RangeDownloadFile(url, filepath string, d Division) error {
+	if err := os.Remove(filepath); err != nil && !os.IsNotExist(err) {
+		logger.Error(err)
+		return err
+	}
+
+	t1 := time.Now()
+
+	if err := d.DownloadFile(url, filepath); err != nil {
+		return err
+	}
+
+	diff := time.Now().Sub(t1)
+	logger.Debug(diff)
+
+	s, err := Md5Sum(filepath)
+	if err != nil {
+		return err
+	}
+	logger.Debug(s)
+
+	return nil
+}
+
+func (rec Client) Get(url string, partial uint64) ([]byte, error) {
 
 	t1 := time.Now()
 	h, err := getHeader(url)
@@ -171,20 +313,37 @@ func (rec Client) Get(url string) ([]byte, error) {
 		return nil, err
 	}
 	if !h.AcceptRanges {
-		return get(url)
+		return Get(url)
 	}
 
-	if h.ContentLength <= rec.Size {
-		return get(url)
+	if h.ContentLength <= partial {
+		return Get(url)
 	}
 
-	rs := getRanges(division{h.ContentLength, rec.Size, 0, 0})
+	rs, err := Division{h.ContentLength, partial, 0}.Ranges()
 
-	by, err := rangeGets(url, rs)
+	by, err := rs.GetBody(url)
 	if err != nil {
 		return nil, err
 	}
 	diff := time.Now().Sub(t1)
 	logger.Debug(diff)
 	return by, nil
+}
+
+func Md5Sum(filepath string) (string, error) {
+	f, err := os.Open(filepath)
+	if err != nil {
+		logger.Error(err)
+		return "", err
+	}
+	defer f.Close()
+
+	h := md5.New()
+	if _, err := io.Copy(h, f); err != nil {
+		logger.Error(err)
+		return "", err
+	}
+
+	return fmt.Sprintf(`%x`, h.Sum(nil)), nil
 }
