@@ -1,0 +1,4 @@
+
+FROM alpine:latest
+COPY main.amd64.bin /
+CMD /main.amd64.bin

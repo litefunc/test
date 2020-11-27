@@ -22,6 +22,16 @@ type C struct {
 	F func() `json:"f"`
 }
 
+type Config struct {
+	Auths           map[string]ConfigAuth `json:"auths"`
+	json.RawMessage `json:",omitempty"`
+}
+
+type ConfigAuth struct {
+	Auth            string `json:"auth"`
+	json.RawMessage `json:",omitempty"`
+}
+
 func main() {
 	var n interface{}
 	var err error
@@ -103,6 +113,10 @@ func main() {
 		3: 3,
 	}
 	j(m)
+
+	var cfg = Config{Auths: make(map[string]ConfigAuth)}
+	cfg.Auths["a"] = ConfigAuth{Auth: "a"}
+	j(cfg)
 
 }
 

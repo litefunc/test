@@ -1,7 +1,7 @@
 package main
 
 import (
-	"LocalServer/logger"
+	"LocalServer/lib/logger"
 	"test/color/internal"
 )
 
@@ -24,6 +24,7 @@ func main() {
 		c.Println("asdasdasdsad")
 	}
 
+	logger.HTTP(123)
 	logger.Trace(123)
 	logger.Debug(123)
 	logger.Info(123)

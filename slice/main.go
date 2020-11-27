@@ -85,4 +85,8 @@ func main() {
 	ss = append(ss, s)
 	logger.Debug(ss)
 	logger.Debug(ss[0], ss[1])
+
+	is := []int{0, 1}
+	Set1(is, 1)
+	logger.Debug(is)
 }

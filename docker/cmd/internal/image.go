@@ -8,7 +8,7 @@ import (
 	"github.com/docker/docker/client"
 )
 
-func ContainerList() {
+func ImageList() {
 
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(client.FromEnv)
@@ -17,19 +17,13 @@ func ContainerList() {
 	}
 	cli.NegotiateAPIVersion(ctx)
 
-	cs, err := cli.ContainerList(ctx, types.ContainerListOptions{All: true})
+	list, err := cli.ImageList(ctx, types.ImageListOptions{})
 	if err != nil {
 		logger.Error(err)
 		return
 	}
-	for i, v := range cs {
+	for i, v := range list {
 		logger.Debug(i, v)
-		// c, err := cli.ContainerInspect(ctx, v.ID)
-		// if err != nil {
-		// 	logger.Error(err)
-		// }
-		// by, _ := json.Marshal(c)
-		// logger.Info(i, string(by))
 	}
 
 }

@@ -25,8 +25,7 @@ docker run -d --name web --network host nginx:test
 docker run -d --name web --network host \
     -v $FILE_DIR/ssl:/etc/nginx/ssl nginx
 
-docker run --name web \
-    -v /home/david/program/go/src/test/docker/nginx/html:/usr/share/nginx/html \
+docker run --name web -p 80:80 -v /home/david/program/go/src/test/docker/nginx/html:/usr/share/nginx/html \
     -v /home/david/program/go/src/test/docker/nginx/volumn:/root/volumn -d nginx
 
-docker run -d --name web -p 80:80 nginx
+docker run --rm -d --name web -p 8084:80 nginx
