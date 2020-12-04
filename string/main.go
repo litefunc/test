@@ -36,4 +36,8 @@ func main() {
 	}
 
 	logger.Debug("" >= "2030378@f1b8cd7b")
+
+	var bytes []byte
+	bytes = nil
+	logger.Debug(string(bytes))
 }
