@@ -64,9 +64,9 @@ func main() {
 	// s4 := append(s2, s3...)
 	// logger.Debug(s4)
 
-	// is := ints{0, 1, 2}
-	// is.add(1)
-	// logger.Debug(is)
+	is := ints{0, 1, 2}
+	is.add(1)
+	logger.Debug(is)
 	// add(is, 1)
 	// logger.Debug(is)
 	// is.append(5)
@@ -77,16 +77,20 @@ func main() {
 	// s5.setA([]int{2, 3, 4})
 	// logger.Debug(s5)
 
-	var ss []*S1
-	var s *S1
-	s = &S1{A: 1}
-	ss = append(ss, s)
-	s = &S1{A: 2}
-	ss = append(ss, s)
-	logger.Debug(ss)
-	logger.Debug(ss[0], ss[1])
+	// var ss []*S1
+	// var s *S1
+	// s = &S1{A: 1}
+	// ss = append(ss, s)
+	// s = &S1{A: 2}
+	// ss = append(ss, s)
+	// logger.Debug(ss)
+	// logger.Debug(ss[0], ss[1])
 
-	is := []int{0, 1}
-	Set1(is, 1)
-	logger.Debug(is)
+	// is := []int{0, 1}
+	// Set1(is, 1)
+	// logger.Debug(is)
+
+	// logger.Debug(is[:1])
+	// logger.Debug(is[:2])
+	// logger.Debug(is[:3])
 }

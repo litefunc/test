@@ -1,8 +1,8 @@
 package main
 
 import (
-	"VodoPlay/logger"
 	"encoding/json"
+	"test/logger"
 )
 
 type A struct {
@@ -20,6 +20,10 @@ type C struct {
 	F func() `json:"f"`
 }
 
+type D struct {
+	D int `json:"-"`
+}
+
 func main() {
 
 	um([]byte{}, &A{})
@@ -27,6 +31,7 @@ func main() {
 	um([]byte(`[1,2]`), []int{})
 	um([]byte(`[1,2]`), &[]int{})
 	um([]byte(`["1","2"]`), &[]int{})
+	um([]byte(`{"D":1}`), &D{})
 }
 
 func j(o interface{}) {

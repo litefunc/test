@@ -52,57 +52,6 @@ func createFileIfNotExist(path string) error {
 
 func main() {
 
-	// pj := path.Join
-
-	// p := os.Getenv("GOPATH") + "/src/test/os/testdir/docker.json"
-
-	// dir, err := filepath.Abs(filepath.Dir(p))
-	// if err != nil {
-	// 	logger.Error(err)
-	// 	return
-	// }
-
-	// // if err := os.RemoveAll(dir); err != nil {
-	// // 	logger.Error(err)
-	// // }
-	// if err := os.MkdirAll(dir, os.ModePerm); err != nil {
-	// 	logger.Error(err)
-	// }
-	// f, err := os.OpenFile(p, os.O_CREATE, os.ModePerm)
-	// if err != nil {
-	// 	logger.Error(err)
-	// }
-	// defer f.Close()
-
-	// stat(p, "/usr/", "usr/abc", "Behind%20My%20Life/Behind%20My%20Life.jpg")
-	// p = os.Getenv("GOPATH") + "/src/test/os/" + "Behind%20My%20Life/Behind%20My%20Life.jpg"
-	// stat(p)
-	// stat(strings.Replace(p, "%20", " ", -1))
-
-	// logger.Debug(isDir(dir))
-	// logger.Debug(isDir(pj(dir, "docker.json")))
-
-	// createFileIfNotExist(pj(dir, "test.json"))
-
-	p1 := os.Getenv("GOPATH") + "/src/test/os/docker1.json"
-	// f, err = os.OpenFile(p1, os.O_CREATE, os.ModePerm)
-	// if err != nil {
-	// 	logger.Error(err)
-	// 	return
-	// }
-
-	// ioutil.WriteFile(p1, []byte(`123`), os.ModePerm)
-	// f.Close()
-
-	// f1, err := os.OpenFile(p1, os.O_CREATE, os.ModePerm)
-	// if err != nil {
-	// 	logger.Error(err)
-	// 	return
-	// }
-	// defer f1.Close()
-
-	bufioWrite(p1, []byte(`abc`))
-	// bufioWrite(p1, []byte(`789`))
 }
 
 func stat(path ...string) {

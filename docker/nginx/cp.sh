@@ -9,7 +9,7 @@ FILE_DIR=$(
 
 # docker cp $FILE_DIR/nginx.conf web:/etc/nginx/nginx.conf
 
-docker cp $FILE_DIR/nginx.conf web:/etc/nginx/conf.d/nginx.conf
+# docker cp $FILE_DIR/nginx.conf web:/etc/nginx/conf.d/nginx.conf
 
 # docker cp $FILE_DIR/nginx.conf web:/etc/nginx/conf.d/nginx.conf
 
@@ -20,3 +20,9 @@ docker cp $FILE_DIR/nginx.conf web:/etc/nginx/conf.d/nginx.conf
 # docker cp $FILE_DIR/web web:/usr/share/nginx/html/web
 
 # docker cp index.html demo:/etc/nginx/conf.d/nginx.conf
+
+# docker cp html/index.html nginx:/root/nginx/html/
+
+docker cp html/index1.html nginx:/usr/share/nginx/html/
+
+docker cp $FILE_DIR/nginx.conf nginx:/etc/nginx/conf.d/nginx.conf

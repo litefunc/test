@@ -1,10 +1,11 @@
 package main
 
 import (
-	"cloud/lib/logger"
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"test/ioutil/internal"
+	"test/logger"
 )
 
 type A struct {
@@ -14,14 +15,11 @@ type A struct {
 func main() {
 
 	var by []byte
-	if err := ioutil.WriteFile("test.json", by, os.ModePerm); err != nil {
-		logger.Error(err)
-	}
+	logger.LogErr(ioutil.WriteFile("test.json", by, os.ModePerm))
 
 	var a A
 	logger.Debug(by == nil)
-	if err := json.Unmarshal(by, &a); err != nil {
-		logger.Error(err)
-	}
+	logger.LogErr(json.Unmarshal(by, &a))
 
+	internal.Temp()
 }

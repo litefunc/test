@@ -38,4 +38,5 @@ func main() {
 
 	logger.Debug(s1, s2)
 	logger.Debugf(`%p, %p, %p, %p, %p, %p`, &s1, s2, &s3, &s4, s5, s1.B)
+
 }
