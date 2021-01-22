@@ -1,8 +1,10 @@
 package internal
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"strings"
 	"syscall"
 )
 
@@ -30,4 +32,34 @@ func redirectStderr(f *os.File) {
 	if err != nil {
 		log.Printf("Failed to redirect stderr to file: %v", err)
 	}
+}
+
+type Logger struct {
+	*log.Logger
+}
+
+func NewLogger(l *log.Logger) *Logger {
+	return &Logger{l}
+}
+
+func (rec *Logger) Println(v ...interface{}) {
+	rec.Logger.Println(v...)
+}
+
+func (rec *Logger) Debug(v ...interface{}) {
+	rec.Logger.SetPrefix("DEBUG ")
+	ss := make([]string, len(v), len(v))
+	for i := range v {
+		ss[i] = fmt.Sprintf(`%v`, v[i])
+	}
+	rec.Logger.Output(2, strings.Join(ss, " "))
+}
+
+func (rec *Logger) Info(v ...interface{}) {
+	rec.Logger.SetPrefix("INFO  ")
+	ss := make([]string, len(v), len(v))
+	for i := range v {
+		ss[i] = fmt.Sprintf(`%v`, v[i])
+	}
+	rec.Logger.Output(2, strings.Join(ss, " "))
 }

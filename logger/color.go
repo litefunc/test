@@ -91,3 +91,7 @@ func (rec color) println(s string) {
 	c := fmt.Sprintf("\x1b[%sm%s\x1b[0m", rec.c, s)
 	fmt.Println(c)
 }
+
+func (rec *color) printLog(log string) {
+	rec.println(log)
+}

@@ -14,4 +14,9 @@ func main() {
 
 	logger.Debug(os.ModePerm.String())
 	logger.Debug(os.FileMode(0666).String())
+
+	if err := os.Truncate("a.txt", 2); err != nil {
+		logger.Error(err)
+	}
+
 }

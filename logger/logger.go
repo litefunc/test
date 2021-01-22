@@ -2,304 +2,202 @@ package logger
 
 import (
 	"fmt"
-	"log"
+	"io"
 	"os"
-	"syscall"
+	"sync"
 )
 
-// Logger represents an active logging object that generates lines ofoutput
 type Logger struct {
 	flag  int
-	level int
-	save  bool
-	file  string
+	level Level
+	print bool
+	mu    *sync.Mutex
+	ws    []io.Writer
+	skip  int
+	ff    LfileFunc
+}
+
+func New(flag int, level Level, print bool, ff LfileFunc, ws ...io.Writer) *Logger {
+	return &Logger{
+		flag:  flag,
+		level: level,
+		print: print,
+		ws:    ws,
+		mu:    &sync.Mutex{},
+		skip:  4,
+		ff:    ff,
+	}
+}
+
+func (rec *Logger) SetFlag(flag int) *Logger {
+	rec.flag = flag
+	return rec
+}
+
+func (rec *Logger) SetLevel(level Level) *Logger {
+	rec.level = level
+	return rec
+}
+
+func (rec *Logger) SetPrint(print bool) *Logger {
+	rec.print = print
+	return rec
+}
+
+func (rec *Logger) SetLfileFunc(ff LfileFunc) *Logger {
+	rec.ff = ff
+	return rec
+}
+
+func (rec *Logger) SetWriters(ws ...io.Writer) *Logger {
+	rec.ws = ws
+	return rec
+}
+
+func (rec *Logger) UpdateConfig(flag int, level Level, print bool, trimPrefix string, ws ...io.Writer) {
+	rec.SetFlag(flag)
+	rec.SetLevel(level)
+	rec.SetPrint(print)
+	rec.SetWriters(ws...)
 }
 
 const (
 	Ltime = 1 << iota
 	Lfile
 	Lline
-	Ltype
-	Ldebug
+	LstdFlag = Ltime | Lfile | Lline
 )
 
-const (
-	LTrace = 1 << iota
-	LDebug
-	LInfo
-	LWarn
-	LError
-	LFatal
-	LPanic
-	LHTTP
-)
+func (rec *Logger) genLog(level string, msg ...interface{}) log {
+	var log log
 
-func SetLogger(flag, level int, save bool, file string, l *Logger) {
-	SetFlags(flag, l)
-	SetLevel(level, l)
-	SetSave(save, l)
-	SetFile(file, l)
-}
-
-// SetFlags represent developer can customize logger
-func SetFlags(flag int, l *Logger) {
-	l.flag = flag
-}
-
-func SetLevel(level int, l *Logger) {
-	l.level = level
-}
-
-func SetSave(save bool, l *Logger) {
-	l.save = save
-}
-
-func SetFile(file string, l *Logger) {
-	l.file = file
-}
-
-func printLog(c *color, log string) {
-	c.println(fmt.Sprintf("%v", log))
-}
-
-func writeToFile(filename string, log string) {
-
-	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
-	if err != nil {
-		fmt.Println(err)
-		return
+	if rec.flag&Ltime != 0 {
+		log.Ltime = genLtime()
 	}
-
-	defer f.Close()
-	if _, err := f.WriteString(log); err != nil {
-		fmt.Println(err)
+	if rec.flag&Lfile != 0 {
+		log.Lfile = rec.ff(rec.skip)
 	}
+	if rec.flag&Lline != 0 {
+		log.Lline = genLline(rec.skip)
+	}
+	log.Level = level
+	log.Msg = genMsg(msg...)
+
+	return log
 }
 
-func SetStderr(f string) {
-
-	logFile, err := os.OpenFile(f, os.O_CREATE|os.O_WRONLY|os.O_APPEND, os.ModePerm)
-	if err != nil {
-		log.Println(err)
-		return
+func write(w io.Writer, p []byte) (int, error) {
+	if w != nil {
+		return w.Write(p)
 	}
-	defer logFile.Close()
-
-	log.SetOutput(logFile)
-	redirectStderr(logFile)
+	return 0, nil
 }
 
-// redirectStderr to the file passed in
-func redirectStderr(f *os.File) {
-	err := syscall.Dup3(int(f.Fd()), int(os.Stderr.Fd()), 0)
-	if err != nil {
-		log.Printf("Failed to redirect stderr to file: %v", err)
-	}
-}
+func (rec *Logger) log(level Level, msg ...interface{}) {
+	if rec.level.contains(level) {
+		rec.mu.Lock()
+		defer rec.mu.Unlock()
 
-func (rec Logger) Trace(msg ...interface{}) {
-	logs := genLog("Trace", msg...)
-
-	if rec.level&LTrace != 0 {
-		log := GenLog(logs)
-		color := newColor(FgBrBlue)
-		printLog(color, log)
-		if rec.save {
-			writeToFile(rec.file, log)
+		log := rec.genLog(level.string(), msg...).string()
+		if rec.print {
+			c := level.color()
+			c.printLog(log)
+		}
+		for _, w := range rec.ws {
+			write(w, []byte(log))
+		}
+		if level == LPanic {
+			panic(msg)
+		}
+		if level == LFatal {
+			os.Exit(1)
 		}
 	}
 }
 
-func (rec Logger) Debug(msg ...interface{}) {
-	logs := genLog("Debug", msg...)
+func (rec *Logger) Trace(msg ...interface{}) {
+	rec.log(LTrace, msg...)
+}
 
-	if rec.level&LDebug != 0 {
-		log := GenLog(logs)
-		color := newColor(FgBrCyan)
-		printLog(color, log)
-		if rec.save {
-			writeToFile(rec.file, log)
+func (rec *Logger) Debug(msg ...interface{}) {
+	rec.log(LDebug, msg...)
+}
+
+func (rec *Logger) Info(msg ...interface{}) {
+	rec.log(LInfo, msg...)
+}
+
+func (rec *Logger) Warn(msg ...interface{}) {
+	rec.log(LWarn, msg...)
+}
+
+func (rec *Logger) Error(msg ...interface{}) {
+	rec.log(LError, msg...)
+}
+
+func (rec *Logger) Panic(msg ...interface{}) {
+	rec.log(LPanic, msg...)
+}
+
+func (rec *Logger) Fatal(msg ...interface{}) {
+	rec.log(LFatal, msg...)
+}
+
+func (rec *Logger) HTTP(msg ...interface{}) {
+	rec.log(LHTTP, msg...)
+}
+
+func (rec *Logger) logf(level Level, format string, msg ...interface{}) {
+	if rec.level.contains(level) {
+		rec.mu.Lock()
+		defer rec.mu.Unlock()
+
+		s := fmt.Sprintf(format, msg...)
+		log := rec.genLog(level.string(), s).string()
+		if rec.print {
+			c := level.color()
+			c.printLog(log)
+		}
+		for _, w := range rec.ws {
+			write(w, []byte(log))
+		}
+		if level == LPanic {
+			panic(msg)
+		}
+		if level == LFatal {
+			os.Exit(1)
 		}
 	}
 }
 
-func (rec Logger) Info(msg ...interface{}) {
-	logs := genLog("Info", msg...)
-
-	if rec.level&LInfo != 0 {
-		log := GenLog(logs)
-		green := newColor(FgBrGreen)
-		printLog(green, log)
-		if rec.save {
-			writeToFile(rec.file, log)
-		}
-	}
+func (rec *Logger) Tracef(format string, msg ...interface{}) {
+	rec.logf(LTrace, format, msg...)
 }
 
-func (rec Logger) Warn(msg ...interface{}) {
-	logs := genLog("Warn", msg...)
-
-	if rec.level&LInfo != 0 {
-		log := GenLog(logs)
-		magenta := newColor(FgBrYellow)
-		printLog(magenta, log)
-		if rec.save {
-			writeToFile(rec.file, log)
-		}
-	}
+func (rec *Logger) Debugf(format string, msg ...interface{}) {
+	rec.logf(LDebug, format, msg...)
 }
 
-func (rec Logger) Error(msg ...interface{}) {
-	logs := genLog("Error", msg...)
-
-	if rec.level&LError != 0 {
-		log := GenLog(logs)
-		red := newColor(FgBrRed)
-		printLog(red, log)
-		if rec.save {
-			writeToFile(rec.file, log)
-		}
-	}
+func (rec *Logger) Infof(format string, msg ...interface{}) {
+	rec.logf(LInfo, format, msg...)
 }
 
-func (rec Logger) Panic(msg ...interface{}) {
-	logs := genLog("Panic", msg...)
-
-	if rec.level&LError != 0 {
-		log := GenLog(logs)
-		red := newColor(FgBrMagenta)
-		printLog(red, log)
-		if rec.save {
-			writeToFile(rec.file, log)
-		}
-	}
-	panic(msg)
+func (rec *Logger) Warnf(format string, msg ...interface{}) {
+	rec.logf(LWarn, format, msg...)
 }
 
-func (rec Logger) HTTP(msg ...interface{}) {
-	logs := genLog("HTTP", msg...)
-
-	if rec.level&LDebug != 0 {
-		log := GenLog(logs)
-		color := newColor(FgBrWhite)
-		printLog(color, log)
-		if rec.save {
-			writeToFile(rec.file, log)
-		}
-	}
+func (rec *Logger) Errorf(format string, msg ...interface{}) {
+	rec.logf(LError, format, msg...)
 }
 
-func (rec Logger) Tracef(format string, msg ...interface{}) {
-	s := fmt.Sprintf(format, msg...)
-	logs := genLog("Trace", s)
-
-	if rec.level&LTrace != 0 {
-		log := GenLog(logs)
-		color := newColor(FgBrBlue)
-		printLog(color, log)
-		if rec.save {
-			writeToFile(rec.file, log)
-		}
-	}
+func (rec *Logger) Panicf(format string, msg ...interface{}) {
+	rec.logf(LPanic, format, msg...)
 }
 
-func (rec Logger) Debugf(format string, msg ...interface{}) {
-	s := fmt.Sprintf(format, msg...)
-	logs := genLog("Debug", s)
-
-	if rec.level&LDebug != 0 {
-		log := GenLog(logs)
-		color := newColor(FgBrCyan)
-		printLog(color, log)
-		if rec.save {
-			writeToFile(rec.file, log)
-		}
-	}
+func (rec *Logger) Fatalf(format string, msg ...interface{}) {
+	rec.logf(LFatal, format, msg...)
 }
 
-func (rec Logger) Infof(format string, msg ...interface{}) {
-	s := fmt.Sprintf(format, msg...)
-	logs := genLog("Info", s)
-
-	if rec.level&LInfo != 0 {
-		log := GenLog(logs)
-		green := newColor(FgBrGreen)
-		printLog(green, log)
-		if rec.save {
-			writeToFile(rec.file, log)
-		}
-	}
-}
-
-func (rec Logger) Warnf(format string, msg ...interface{}) {
-	s := fmt.Sprintf(format, msg...)
-	logs := genLog("Warn", s)
-
-	if rec.level&LInfo != 0 {
-		log := GenLog(logs)
-		magenta := newColor(FgBrYellow)
-		printLog(magenta, log)
-		if rec.save {
-			writeToFile(rec.file, log)
-		}
-	}
-}
-
-func (rec Logger) Errorf(format string, msg ...interface{}) {
-	s := fmt.Sprintf(format, msg...)
-	logs := genLog("Error", s)
-
-	if rec.level&LError != 0 {
-		log := GenLog(logs)
-		red := newColor(FgBrRed)
-		printLog(red, log)
-		if rec.save {
-			writeToFile(rec.file, log)
-		}
-	}
-}
-
-func (rec Logger) Fatal(msg ...interface{}) {
-	msgs := append(msg, "os.Exit(1)")
-	logs := genLog("Fatal", msgs...)
-
-	if rec.level&LInfo != 0 {
-		log := GenLog(logs)
-		yellow := newColor(FgRed, BgBrBlue)
-		printLog(yellow, log)
-		if rec.save {
-			writeToFile(rec.file, log)
-		}
-	}
-	os.Exit(1)
-}
-
-func (rec Logger) Fatalf(format string, msg ...interface{}) {
-	msgs := append(msg, "os.Exit(1)")
-	s := fmt.Sprintf(format, msgs...)
-	logs := genLog("Fatal", s)
-
-	if rec.level&LInfo != 0 {
-		log := GenLog(logs)
-		yellow := newColor(FgRed, BgBrBlue)
-		printLog(yellow, log)
-		if rec.save {
-			writeToFile(rec.file, log)
-		}
-	}
-	os.Exit(1)
-}
-
-func (rec Logger) HTTPf(format string, msg ...interface{}) {
-	s := fmt.Sprintf(format, msg...)
-	logs := genLog("HTTP", s)
-
-	if rec.level&LHTTP != 0 {
-		log := GenLog(logs)
-		color := newColor(FgBrWhite)
-		printLog(color, log)
-		if rec.save {
-			writeToFile(rec.file, log)
-		}
-	}
+func (rec *Logger) HTTPf(format string, msg ...interface{}) {
+	rec.logf(LHTTP, format, msg...)
 }
