@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"test/logger"
+)
 
 type Ints []int
 
@@ -9,11 +12,11 @@ func (is Ints) Ints() []int {
 }
 
 func pins(is []int) {
-	fmt.Println(is)
+	logger.Debug(is)
 }
 
 func pins1(is Ints) {
-	fmt.Println(is.Ints())
+	logger.Debug(is.Ints())
 }
 
 type S struct{}
@@ -40,7 +43,7 @@ func pI(i I) {
 
 func main() {
 
-	var is []int
+	var is = []int{1, 2, 3}
 	pins(is)
 	pins1(is)
 
@@ -65,11 +68,11 @@ func main() {
 	var i1 int
 
 	pI(i0)
-	pI(i1)
+	// pI(i1)
 	pI(I(i1))
 	pI(1)
 
-	pi(i0)
+	// pi(i0)
 	pi(i1)
 	pi(int(i0))
 	pi(1)
