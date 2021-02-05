@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"test/json/unmarshall/internal"
 	"test/logger"
 )
 
@@ -26,12 +27,17 @@ type D struct {
 
 func main() {
 
-	um([]byte{}, &A{})
-	um([]byte{}, []int{})
-	um([]byte(`[1,2]`), []int{})
-	um([]byte(`[1,2]`), &[]int{})
-	um([]byte(`["1","2"]`), &[]int{})
-	um([]byte(`{"D":1}`), &D{})
+	// um([]byte{}, &A{})
+	// um([]byte{}, []int{})
+	// um([]byte(`[1,2]`), []int{})
+	// um([]byte(`[1,2]`), &[]int{})
+	// um([]byte(`["1","2"]`), &[]int{})
+	// um([]byte(`{"D":1}`), &D{})
+
+	internal.Null()
+	// internal.NullString()
+	// internal.Empty()
+	// internal.EmptyString()
 }
 
 func j(o interface{}) {

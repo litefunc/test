@@ -2,41 +2,55 @@ package null
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"encoding/json"
-	"strings"
 )
 
-// Int64 is an alias for sql.NullInt64 data type
 type Int64 struct {
-	sql.NullInt64
+	v sql.NullInt64
 }
 
-// MarshalJSON for Int64
-func (ni Int64) MarshalJSON() ([]byte, error) {
-	if !ni.Valid {
-		return []byte("null"), nil
+func NewInt64(v int64) Int64 {
+
+	return Int64{
+		v: sql.NullInt64{Int64: v, Valid: true},
 	}
-	return json.Marshal(ni.Int64)
 }
 
-// UnmarshalJSON for Int64
-func (ni *Int64) UnmarshalJSON(b []byte) error {
-	var err error
+func (rec Int64) MarshalJSON() ([]byte, error) {
+	if !rec.v.Valid {
+		return []byte(`null`), nil
+	}
+	return json.Marshal(rec.v.Int64)
+}
 
-	if strings.Contains(string(b), "Valid") {
-		err = json.Unmarshal(b, &ni.NullInt64)
-	} else if string(b) == "null" {
-		ni.Valid = false
+func (rec *Int64) UnmarshalJSON(b []byte) error {
+	if string(b) == `null` {
+		rec.v.Valid = false
+		rec.v.Int64 = 0
 		return nil
-	} else {
-		err = json.Unmarshal(b, &ni.Int64)
 	}
 
-	ni.Valid = (err == nil)
+	err := json.Unmarshal(b, &rec.v.Int64)
+
+	rec.v.Valid = (err == nil)
 	return err
 }
 
-func NewInt64(i int64) Int64 {
-	x := sql.NullInt64{Int64: i, Valid: true}
-	return Int64{x}
+func (rec Int64) Valid() bool {
+	return rec.v.Valid
+}
+
+func (rec Int64) Int64() int64 {
+	return rec.v.Int64
+}
+
+// Scan implements the sql.Scanner interface.
+func (rec *Int64) Scan(v interface{}) error {
+	return rec.v.Scan(v)
+}
+
+// Value implements the sql/driver Valuer interface.
+func (rec Int64) Value() (driver.Value, error) {
+	return rec.v.Value()
 }

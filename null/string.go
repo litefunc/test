@@ -2,38 +2,55 @@ package null
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"encoding/json"
-	"strings"
 )
 
-// String is an alias for sql.NullString data type
 type String struct {
-	sql.NullString
+	v sql.NullString
 }
 
-// MarshalJSON for String
-func (ns String) MarshalJSON() ([]byte, error) {
-	if !ns.Valid {
-		return []byte("null"), nil
+func NewString(v string) String {
+
+	return String{
+		v: sql.NullString{String: v, Valid: true},
 	}
-	return json.Marshal(ns.String)
 }
 
-// UnmarshalJSON for String
-func (ns *String) UnmarshalJSON(b []byte) error {
-	var err error
+func (rec String) MarshalJSON() ([]byte, error) {
+	if !rec.v.Valid {
+		return []byte(`null`), nil
+	}
+	return json.Marshal(rec.v.String)
+}
 
-	if strings.Contains(string(b), "Valid") {
-		err = json.Unmarshal(b, &ns.NullString)
-	} else {
-		err = json.Unmarshal(b, &ns.String)
+func (rec *String) UnmarshalJSON(b []byte) error {
+	if string(b) == `null` {
+		rec.v.Valid = false
+		rec.v.String = ``
+		return nil
 	}
 
-	ns.Valid = (err == nil)
+	err := json.Unmarshal(b, &rec.v.String)
+
+	rec.v.Valid = (err == nil)
 	return err
 }
 
-func NewString(s string) String {
-	x := sql.NullString{String: s, Valid: true}
-	return String{x}
+func (rec String) Valid() bool {
+	return rec.v.Valid
+}
+
+func (rec String) String() string {
+	return rec.v.String
+}
+
+// Scan implements the sql.Scanner interface.
+func (rec *String) Scan(v interface{}) error {
+	return rec.v.Scan(v)
+}
+
+// Value implements the sql/driver Valuer interface.
+func (rec String) Value() (driver.Value, error) {
+	return rec.v.Value()
 }

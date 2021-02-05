@@ -2,39 +2,55 @@ package null
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"encoding/json"
-	"strings"
 )
 
-// Bool is an alias for sql.NullBool data type
 type Bool struct {
-	sql.NullBool
+	v sql.NullBool
 }
 
-// MarshalJSON for Bool
-func (nb Bool) MarshalJSON() ([]byte, error) {
-	if !nb.Valid {
-		return []byte("null"), nil
+func NewBool(v bool) Bool {
+
+	return Bool{
+		v: sql.NullBool{Bool: v, Valid: true},
 	}
-	return json.Marshal(nb.Bool)
 }
 
-// UnmarshalJSON for Bool
-func (nb *Bool) UnmarshalJSON(b []byte) error {
+func (rec Bool) MarshalJSON() ([]byte, error) {
+	if !rec.v.Valid {
+		return []byte(`null`), nil
+	}
+	return json.Marshal(rec.v.Bool)
+}
 
-	var err error
-
-	if strings.Contains(string(b), "Valid") {
-		err = json.Unmarshal(b, &nb.NullBool)
-	} else {
-		err = json.Unmarshal(b, &nb.Bool)
+func (rec *Bool) UnmarshalJSON(b []byte) error {
+	if string(b) == `null` {
+		rec.v.Valid = false
+		rec.v.Bool = false
+		return nil
 	}
 
-	nb.Valid = (err == nil)
+	err := json.Unmarshal(b, &rec.v.Bool)
+
+	rec.v.Valid = (err == nil)
 	return err
 }
 
-func NewBool(b bool) Bool {
-	x := sql.NullBool{Bool: b, Valid: true}
-	return Bool{x}
+func (rec Bool) Valid() bool {
+	return rec.v.Valid
+}
+
+func (rec Bool) Bool() bool {
+	return rec.v.Bool
+}
+
+// Scan implements the sql.Scanner interface.
+func (rec *Bool) Scan(v interface{}) error {
+	return rec.v.Scan(v)
+}
+
+// Value implements the sql/driver Valuer interface.
+func (rec Bool) Value() (driver.Value, error) {
+	return rec.v.Value()
 }
