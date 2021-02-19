@@ -7,6 +7,7 @@ import (
 )
 
 func Null() {
+	um([]byte(``))
 	um([]byte(`null`))
 	uma([]byte(`null`))
 	uma([]byte(`{"a": 1, "b": 2}`))
@@ -59,6 +60,12 @@ func um(by []byte) {
 		logger.Error(err)
 	}
 	logger.Debug("time:", t)
+
+	var a a
+	if err := json.Unmarshal(by, &a); err != nil {
+		logger.Error(err)
+	}
+	logger.Debug("a:", a)
 }
 
 func uma(by []byte) {
