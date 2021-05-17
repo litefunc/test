@@ -1,0 +1,17 @@
+{
+    "a": {
+        "type": "object",
+        "properties": {
+            "p1": {
+                "type": "string"
+            },
+            "p2": {
+                "type": "string"
+            }
+        },
+        "required": [
+            "p1",
+            "p2"
+        ]
+    }
+}
