@@ -1,0 +1,43 @@
+{
+    "address": {
+        "type": "object",
+        "properties": {
+            "street_address": {
+                "type": "string"
+            },
+            "city": {
+                "type": "string"
+            },
+            "state": {
+                "type": "string"
+            }
+        },
+        "required": [
+            "street_address",
+            "city",
+            "state"
+        ]
+    },
+    "address1": {
+        "type": "object",
+        "properties": {
+            "street_address": {
+                "type": "string"
+            },
+            "city": {
+                "type": "string"
+            },
+            "state": {
+                "type": "string"
+            }
+        },
+        "required": [
+            "street_address",
+            "city",
+            "state"
+        ]
+    },
+    "address2": {
+        "$ref": "s3.json#/a"
+    }
+}

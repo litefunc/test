@@ -1,0 +1,125 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "type": "object",
+    "properties": {
+        "success": {
+            "type": "boolean",
+            "enum": [
+                true
+            ]
+        },
+        "data": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "coms": {
+                    "type": "array",
+                    "items": [
+                        {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string"
+                                },
+                                "meta": {
+                                    "type": "object",
+                                    "properties": {
+                                        "zip": {
+                                            "type": "string"
+                                        },
+                                        "broadcast": {
+                                            "type": "object"
+                                        },
+                                        "note": {
+                                            "type": "string"
+                                        },
+                                        "nation": {
+                                            "type": "string"
+                                        },
+                                        "phone": {
+                                            "type": "string"
+                                        },
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "tel": {
+                                            "type": "string"
+                                        },
+                                        "addr": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "zip",
+                                        "note",
+                                        "nation",
+                                        "phone",
+                                        "name",
+                                        "tel",
+                                        "addr"
+                                    ]
+                                },
+                                "grps": {
+                                    "type": "array",
+                                    "items": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "meta": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "name": {
+                                                            "type": "string"
+                                                        },
+                                                        "kw": {
+                                                            "type": "array",
+                                                            "items": [
+                                                                {
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "note": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "name",
+                                                        "note"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "meta"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "meta"
+                            ],
+                            "additionalProperties": false
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "id",
+                "coms"
+            ],
+            "additionalProperties": false
+        }
+    },
+    "required": [
+        "success",
+        "data"
+    ]
+}
