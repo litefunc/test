@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"test/logger"
+	"time"
 )
 
 func isDir(path string) (bool, error) {
@@ -53,22 +54,27 @@ func createFileIfNotExist(path string) error {
 func main() {
 	de, err := os.ReadDir("dir")
 	if err != nil {
-		logger.Error(err)
+		logger.Fatal(err)
 	}
-	for _, v := range de {
-		logger.Trace(v.Name())
-		logger.Trace(v.IsDir())
-		logger.Trace(v.Type())
-		i, err := v.Info()
-		if err != nil {
-			logger.Error(err)
+
+	t := time.NewTicker(time.Second * 10)
+	for range t.C {
+		for _, v := range de {
+			logger.Trace(v.Name())
+			logger.Trace(v.IsDir())
+			logger.Trace(v.Type())
+			i, err := v.Info()
+			if err != nil {
+				logger.Error(err)
+				continue
+			}
+			logger.Debug(i.Name())
+			logger.Debug(i.Size())
+			logger.Debug(i.Mode())
+			logger.Debug(i.ModTime())
+			logger.Debug(i.IsDir())
+			logger.Debug(i.Sys())
 		}
-		logger.Debug(i.Name())
-		logger.Debug(i.Size())
-		logger.Debug(i.Mode())
-		logger.Debug(i.ModTime())
-		logger.Debug(i.IsDir())
-		logger.Debug(i.Sys())
 	}
 
 }
