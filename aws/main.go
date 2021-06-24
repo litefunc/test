@@ -63,44 +63,140 @@ var CanonicalHeaders = map[string]string{
 	"x-amz-date":           t.Format("20060102T150405Z"),
 }
 
+type CanonicalRequest struct {
+	HTTPMethod           string
+	CanonicalURI         string
+	CanonicalQueryString string
+	CanonicalHeaders     map[string]string
+	HashPayload          string
+}
+
+func (rec CanonicalRequest) String() string {
+
+	s := fmt.Sprintf("%s\n%s\n%s\n", rec.HTTPMethod, rec.CanonicalURI, rec.CanonicalQueryString)
+	SignedHeaders := []string{}
+	for k := range rec.CanonicalHeaders {
+		SignedHeaders = append(SignedHeaders, k)
+	}
+	sort.Strings(SignedHeaders)
+	for _, k := range SignedHeaders {
+		s += fmt.Sprintf("%s:%s\n", k, rec.CanonicalHeaders[k])
+	}
+
+	s += fmt.Sprintf("\n%s\n%s", strings.Join(SignedHeaders, ";"), rec.HashPayload)
+
+	fmt.Printf("Canonical Request:\n%s\n\n", s)
+	return s
+}
+
+type StringToSign struct {
+	t      time.Time
+	region string
+	cr     string
+}
+
+func (rec StringToSign) String() string {
+
+	s := fmt.Sprintf("AWS4-HMAC-SHA256\n%s\n%s/%s/s3/aws4_request\n%s", rec.t.Format("20060102T150405Z"), rec.t.Format("20060102"), rec.region, Hex(sha256Hash(rec.cr)))
+
+	fmt.Printf("StringToSign:\n%s\n\n", s)
+	return s
+}
+
+type Signature struct {
+	t               time.Time
+	SecretAccessKey string
+	region          string
+	sts             string
+}
+
+func (rec Signature) String() string {
+
+	hash := getHMAC([]byte("AWS4"+rec.SecretAccessKey), []byte(rec.t.Format("20060102")))
+	hash = getHMAC(hash, []byte(rec.region))
+	hash = getHMAC(hash, []byte("s3"))
+	hash = getHMAC(hash, []byte("aws4_request"))
+
+	s := Hex(getHMAC(hash, []byte(rec.sts)))
+	fmt.Printf("Signature:\n%s\n\n", s)
+	return s
+}
+
 // var SignedHeaders = "host;range;x-amz-content-sha256;x-amz-date\n"
 var SignedHeaders = []string{}
 
 var HashPayload = Hex(sha256Hash(""))
 
+// func genRequest(cr CanonicalRequest, sg Signature) string {
+// 	s := fmt.Sprintf("%s %s HTTP/1.1\n", cr.HTTPMethod, cr.CanonicalURI)
+// 	s += fmt.Sprintf("Host: %s\n", cr.CanonicalHeaders["host"])
+// 	return s
+// }
+
 func main() {
-	fmt.Println("Canonical Request:")
 
-	s := HTTPMethod + CanonicalURI + CanonicalQueryString
-	for k := range CanonicalHeaders {
-		SignedHeaders = append(SignedHeaders, k)
+	cr := CanonicalRequest{
+		HTTPMethod:           "GET",
+		CanonicalURI:         "/test.txt",
+		CanonicalQueryString: "",
+		CanonicalHeaders: map[string]string{
+			"host":                 "examplebucket.s3.amazonaws.com",
+			"range":                "bytes=0-9",
+			"x-amz-content-sha256": HashPayload,
+			"x-amz-date":           t.Format("20060102T150405Z"),
+		},
+		HashPayload: Hex(sha256Hash("")),
 	}
-	sort.Strings(SignedHeaders)
-	for _, k := range SignedHeaders {
-		s += fmt.Sprintf("%s:%s\n", k, CanonicalHeaders[k])
-	}
+	s := cr.String()
 
-	s += "\n"
+	s1 := StringToSign{
+		t:      t,
+		region: "us-east-1",
+		cr:     s,
+	}.String()
 
-	s += fmt.Sprintf("%s\n", strings.Join(SignedHeaders, ";"))
-	s += HashPayload
+	Signature{
+		t:               t,
+		SecretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+		region:          "us-east-1",
+		sts:             s1,
+	}.String()
 
-	fmt.Println(s)
-
-	s1 := fmt.Sprintf("AWS4-HMAC-SHA256\n%s\n%s/us-east-1/s3/aws4_request\n%s", CanonicalHeaders["x-amz-date"], t.Format("20060102"), Hex(sha256Hash(s)))
-	fmt.Println("StringToSign:")
-	fmt.Println(s1)
-
-	fmt.Println("SigningKey:")
-
-	hash := getHMAC([]byte("AWS4"+"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"), []byte("20130524"))
-	hash = getHMAC(hash, []byte("us-east-1"))
-	hash = getHMAC(hash, []byte("s3"))
-	hash = getHMAC(hash, []byte("aws4_request"))
-
-	fmt.Println("signature:")
-
-	sum := getHMAC(hash, []byte(s1))
-	signature := Hex(sum)
-	fmt.Println(signature)
 }
+
+// func main() {
+// 	fmt.Println("Canonical Request:")
+
+// 	s := HTTPMethod + CanonicalURI + CanonicalQueryString
+// 	for k := range CanonicalHeaders {
+// 		SignedHeaders = append(SignedHeaders, k)
+// 	}
+// 	sort.Strings(SignedHeaders)
+// 	for _, k := range SignedHeaders {
+// 		s += fmt.Sprintf("%s:%s\n", k, CanonicalHeaders[k])
+// 	}
+
+// 	s += "\n"
+
+// 	s += fmt.Sprintf("%s\n", strings.Join(SignedHeaders, ";"))
+// 	s += HashPayload
+
+// 	fmt.Println(s)
+
+// 	s1 := fmt.Sprintf("AWS4-HMAC-SHA256\n%s\n%s/us-east-1/s3/aws4_request\n%s", CanonicalHeaders["x-amz-date"], t.Format("20060102"), Hex(sha256Hash(s)))
+// 	fmt.Println("StringToSign:")
+// 	fmt.Println(s1)
+
+// 	fmt.Println("SigningKey:")
+
+// 	hash := getHMAC([]byte("AWS4"+"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"), []byte("20130524"))
+// 	hash = getHMAC(hash, []byte("us-east-1"))
+// 	hash = getHMAC(hash, []byte("s3"))
+// 	hash = getHMAC(hash, []byte("aws4_request"))
+
+// 	fmt.Println("signature:")
+
+// 	sum := getHMAC(hash, []byte(s1))
+// 	signature := Hex(sum)
+// 	fmt.Println(signature)
+// }
