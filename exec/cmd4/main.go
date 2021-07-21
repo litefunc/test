@@ -9,7 +9,7 @@ import (
 
 func main() {
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 10; i++ {
 		go func(i int) {
 			cmd := exec.Command("./script.sh")
 			cmd.Stdout = os.Stdout
